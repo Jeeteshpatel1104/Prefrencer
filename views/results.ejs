@@ -1,0 +1,525 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Search Results</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background-color: #f8fafc;
+            padding: 2rem;
+            color: #333;
+        }
+        
+        h2 {
+            color: #4f46e5;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            font-size: 2rem;
+        }
+        
+        .results-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        th {
+            background-color: #4f46e5;
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 500;
+            position: sticky;
+            top: 0;
+        }
+        
+        td {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid #e0dfe7;
+            transition: background-color 0.2s;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover td {
+            background-color: #f5f4ff;
+        }
+        
+        .rank-container {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+        
+        .rank-tooltip {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: white;
+            border: 1px solid #e0dfe7;
+            border-radius: 6px;
+            padding: 0.8rem;
+            z-index: 10;
+            min-width: 180px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .rank-tooltip strong {
+            color: #4f46e5;
+            display: inline-block;
+            width: 50px;
+        }
+        
+        .rank-container:hover .rank-tooltip {
+            display: block;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: #9f9dad;
+            font-size: 1.1rem;
+        }
+        
+        .search-again {
+            display: inline-block;
+            background-color: #4f46e5;
+            color: white;
+            text-decoration: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        
+        .search-again:hover {
+            background-color: #4338ca;
+        }
+        
+        .action-container {
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        /* Zebra striping for better readability */
+        tr:nth-child(even) {
+            background-color: #f9f9fb;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .results-container {
+                padding: 1rem;
+            }
+            
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            th, td {
+                padding: 0.6rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="results-container">
+        <h2>College Search Results</h2>
+
+        <% if (results && results.length > 0) { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>S.No</th>
+                        <th>College Name</th>
+                        <th>Institute Type</th>
+                        <th>Branch</th>
+                        <th>Category</th>
+                        <th>Round</th>
+                        <th>Opening Rank</th>
+                        <th>Closing Rank</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% results.forEach(function(row, index) { %>
+                    <tr>
+                        <td><%= index + 1 %></td>
+                        <td><strong><%= row.college_name %></strong></td>
+                        <td><%= row.institute_type %></td>
+                        <td><%= row.branch %></td>
+                        <td><span class="category-tag"><%= row.allotted_category %></span></td>
+                        <td><%= row.round %></td>
+                        <td>
+                            <div class="rank-container">
+                                <span class="rank-value"><%= row.opening_rank_2024 || 'N/A' %></span>
+                                <div class="rank-tooltip">
+                                    <strong>2024:</strong> <%= row.opening_rank_2024 || 'N/A' %><br>
+                                    <strong>2023:</strong> <%= row.opening_rank_2023 || 'N/A' %><br>
+                                    <strong>2022:</strong> <%= row.opening_rank_2022 || 'N/A' %>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="rank-container">
+                                <span class="rank-value"><%= row.closing_rank_2024 || 'N/A' %></span>
+                                <div class="rank-tooltip">
+                                    <strong>2024:</strong> <%= row.closing_rank_2024 || 'N/A' %><br>
+                                    <strong>2023:</strong> <%= row.closing_rank_2023 || 'N/A' %><br>
+                                    <strong>2022:</strong> <%= row.closing_rank_2022 || 'N/A' %>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <p class="no-results">No colleges found for the given rank and category.</p>
+        <% } %>
+    </div>
+
+    <div class="action-container">
+        <a href="/" class="search-again">Search Again</a>
+    </div>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>College Search Results</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #e0dfe7;
+      color: #333;
+    }
+
+    h2 {
+      text-align: center;
+      color: #4a4762;
+      font-weight: bold;
+      margin-bottom: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #9f9dad;
+      color: white;
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f5f5f7;
+    }
+
+    tr:hover {
+      background-color: #eaeaf0;
+    }
+
+    .rank-container {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .rank-tooltip {
+      display: none;
+      position: absolute;
+      background-color: #ffffff;
+      border: 1px solid #ccc;
+      padding: 8px;
+      font-size: 14px;
+      z-index: 10;
+      white-space: nowrap;
+      top: 100%;
+      left: 0;
+      margin-top: 4px;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .rank-container:hover .rank-tooltip {
+      display: block;
+    }
+
+    a {
+      display: block;
+      margin-top: 30px;
+      text-align: center;
+      text-decoration: none;
+      color: white;
+      background-color: #9f9dad;
+      padding: 10px 20px;
+      border-radius: 6px;
+      width: 200px;
+      margin-left: auto;
+      margin-right: auto;
+      transition: background-color 0.3s ease;
+    }
+
+    a:hover {
+      background-color: #837f99;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>College Search Results</h2>
+
+  <% if (results && results.length > 0) { %>
+    <table>
+      <tr>
+        <th>S.No</th>
+        <th>College Name</th>
+        <th>Institute Type</th>
+        <th>Branch</th>
+        <th>Category</th>
+        <th>Round</th>
+        <th>Opening Rank</th>
+        <th>Closing Rank</th>
+      </tr>
+      <% results.forEach(function(row, index) { %>
+      <tr>
+        <td><%= index + 1 %></td>
+        <td><%= row.college_name %></td>
+        <td><%= row.institute_type %></td>
+        <td><%= row.branch %></td>
+        <td><%= row.allotted_category %></td>
+        <td><%= row.round %></td>
+        <td>
+          <div class="rank-container">
+            <%= row.opening_rank_2024 || 'N/A' %>
+            <div class="rank-tooltip">
+              <strong>2024:</strong> <%= row.opening_rank_2024 || 'N/A' %><br>
+              <strong>2023:</strong> <%= row.opening_rank_2023 || 'N/A' %><br>
+              <strong>2022:</strong> <%= row.opening_rank_2022 || 'N/A' %>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div class="rank-container">
+            <%= row.closing_rank_2024 || 'N/A' %>
+            <div class="rank-tooltip">
+              <strong>2024:</strong> <%= row.closing_rank_2024 || 'N/A' %><br>
+              <strong>2023:</strong> <%= row.closing_rank_2023 || 'N/A' %><br>
+              <strong>2022:</strong> <%= row.closing_rank_2022 || 'N/A' %>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <% }) %>
+    </table>
+  <% } else { %>
+    <p style="text-align: center; font-weight: bold; font-size: 18px;">No colleges found for the given rank and category.</p>
+  <% } %>
+
+  <a href="/">Search Again</a>
+
+</body>
+</html>
+
+
+<!-- 
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Search Results</title>
+
+
+<style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid black;
+        }
+        .rank-container {
+            position: relative; /* To position the tooltip */
+        }
+        .rank-tooltip {
+            display: none; /* Hidden by default */
+            position: absolute;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 5px;
+            z-index: 10;
+            white-space: nowrap;
+        }
+        .rank-container:hover .rank-tooltip {
+            display: block; /* Show tooltip on hover */
+        }
+    </style>
+</head>
+<body>
+    <h2>Search Results</h2>
+
+    <% if (results && results.length > 0) { %>
+        <table>
+            <tr>
+                <th>S.No</th>
+                <th>College Name</th>
+                <th>Institute Type</th>
+                <th>Branch</th>
+                <th>Category</th>
+                <th>Round</th>
+                <th>Opening Rank</th>
+                <th>Closing Rank</th>
+            </tr>
+            <% results.forEach(function(row, index) { %>
+            <tr>
+                <td><%= index + 1 %></td>
+                <td><%= row.college_name %></td>
+                <td><%= row.institute_type %></td>
+                <td><%= row.branch %></td>
+                <td><%= row.allotted_category %></td>
+                <td><%= row.round %></td>
+                <td>
+                    <div class="rank-container">
+                        <%= row.opening_rank_2024 || 'N/A' %>
+                        <div class="rank-tooltip">
+                            <strong>2024:</strong> <%= row.opening_rank_2024 || 'N/A' %><br>
+                            <strong>2023:</strong> <%= row.opening_rank_2023 || 'N/A' %><br>
+                            <strong>2022:</strong> <%= row.opening_rank_2022 || 'N/A' %>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="rank-container">
+                        <%= row.closing_rank_2024 || 'N/A' %>
+                        <div class="rank-tooltip">
+                            <strong>2024:</strong> <%= row.closing_rank_2024 || 'N/A' %><br>
+                            <strong>2023:</strong> <%= row.closing_rank_2023 || 'N/A' %><br>
+                            <strong>2022:</strong> <%= row.closing_rank_2022 || 'N/A' %>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <% }) %>
+        </table>
+
+    <% } else { %>
+        <p>No colleges found for the given rank and category.</p>
+    <% } %>
+
+    <a href="/">Search Again</a>
+</body> -->
+
+
+
+<!-- //end -->
+
+
+
+<!-- <body>
+    <h2>Search Results</h2>
+    
+    
+    <% if (results && results.length > 0) { %>
+        <table border="1">
+            <tr>
+                <th>S.No</th>
+                <th>College Name</th>
+                <th>Institute Type</th>
+                <th>Branch</th>
+                <th>Category</th>
+                <th>Opening Rank</th>
+                <th>Closing Rank</th>
+            </tr>
+            <% results.forEach(function(row, index) { %>
+            <tr>
+                <td><%= index + 1 %></td>
+                <td><%= row.college_name %></td>
+                <td><%= row.institute_type %></td>
+                <td><%= row.branch %></td>
+                <td><%= row.allotted_category %></td>
+                <td><%= row.opening_rank %></td>
+                <td><%= row.closing_rank %></td>
+            </tr>
+            <% }) %>
+        </table>
+    <% } else { %>
+        <p>No colleges found for the given rank and category.</p>
+    <% } %>
+    <a href="/">Search Again</a>
+</body> -->
+
+
+
+
+<!-- SELECT college_name, institute_type, branch, opening_rank, closing_rank
+FROM data_table
+WHERE closing_rank BETWEEN 50000 AND 80000
+AND allotted_category = 'EWS'; -->
+
+<!-- LOAD DATA INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/ranked_list.csv'
+INTO TABLE ranked_list
+FIELDS TERMINATED BY ',' 
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n' -->
+
+<!-- SELECT * FROM data_table
+WHERE closing_rank BETWEEN 0 AND 9000000
+AND allotted_category = 'OBC/X/OP'
+AND domicile = 'YE'
+AND year = 2023
+AND institute_type = 'S.F.I.' ; -->
+
+<!-- SELECT * FROM data_table 
+WHERE allotted_category = 'OBC/X/OP' ; -->

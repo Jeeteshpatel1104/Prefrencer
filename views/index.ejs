@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Preference Finder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- ==================== -->
+    <!--        STYLES         #bfbec9-->
+    <!-- ==================== -->
+    <style>
+        body {
+            background-color: #e3e3ed;
+            background-image: 
+                linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px; /* controls grid spacing */
+        }
+    
+        .dropdown {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+    
+        .dropdown-btn {
+            background-color: #f3f4f6;
+            color: rgb(0, 0, 0);
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            width: 100%;
+            text-align: left;
+        }
+    
+        .dropdown-btn:hover {
+            background-color: #ffffff;
+        }
+    
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #ffffff;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            max-height: 200px;
+            overflow-y: auto;
+            width: 100%;
+        }
+    
+        .dropdown-content.show {
+            display: block;
+        }
+    
+        .dropdown-content label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+    
+        .dropdown-content input[type="checkbox"] {
+            margin-right: 10px;
+        }
+    
+        .checkbox-row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+    
+        .checkbox-row label {
+            margin-right: 10px;
+        }
+    </style>
+    
+</head>
+
+<body class="font-sans">
+    <!-- ==================== -->
+    <!--        HEADER         -->
+    <!-- ==================== -->
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 py-2 flex justify-between items-center">
+            <img src="/images/MargDarshak.png" alt="MargDarshak logo" class="h-10">
+
+            <% if (locals.user) { %>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-600">Welcome, <%= user.name %></span>
+                    <a href="/logout" class="text-sm text-blue-600 hover:text-blue-800">Logout</a>
+                </div>
+            <% } %>
+        </div>
+    </header>
+
+    <!-- ==================== -->
+    <!--        MAIN           -->
+    <!-- ==================== -->
+    <main class="container mx-auto px-4 py-8">
+        <nav class="mb-6">
+            <a href="#" class="text-blue-600 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10.707 3.293a1 1 0 010 1.414L6.414 9H17a1 1 0 110 2H6.414l4.293 4.293a1 1 0 11-1.414 1.414l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                Back
+            </a>
+        </nav>
+
+        <div class="text-center mb-8">
+            <img src="/images/MargDarshak.png" alt="MargDarshak logo" class="mx-auto mb-4 h-16">
+            <h1 class="text-4xl font-bold mb-2">College Preference Finder</h1>
+            <p class="text-green-600 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                No Hidden Charges, 100% Free
+            </p>
+        </div>
+
+        <!-- ==================== -->
+        <!--        FORM           -->
+        <!-- ==================== -->
+        <form action="/search" method="POST" class="bg-white shadow-md rounded-lg p-6">
+            <!-- Rank/Domicile/Caste Row -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="rank" class="block text-sm font-medium text-gray-700 mb-1">Rank:</label>
+                    <input type="number" id="rank" name="rank" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+                </div>
+                <div>
+                    <label for="domicile" class="block text-sm font-medium text-gray-700 mb-1">Domicile:</label>
+                    <select id="domicile" name="domicile" class="w-full px-3 py-2 border border-gray-300 rounded-md" onchange="handleDomicileChange()" required>
+                        <option value='AI'>All India</option>
+                        <option value='Y'>MP Resident</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="caste" class="block text-sm font-medium text-gray-700 mb-1">Caste:</label>
+                    <select id="caste" name="caste" class="w-full px-3 py-2 border border-gray-300 rounded-md" onchange="handleCasteChange()" required></select>
+                </div>
+            </div>
+
+            <!-- Class/Gender/Categories Row -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <div id="class-container">
+                    <label for="class" class="block text-sm font-medium text-gray-700 mb-1">Class:</label>
+                    <select id="class" name="class" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                        <option value='X'>NILL (X)</option>
+                        <option value='H'>Handicapped (H)</option>
+                        <option value='S'>Sainik (S)</option>
+                        <option value='NCC'>NCC</option>
+                        <option value='FF'>Freedom Fighter (FF)</option>
+                    </select>
+                </div>
+                <div id="gender-container">
+                    <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Gender:</label>
+                    <select id="gender" name="gender" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                        <option value='OP'>Open (OP)</option>
+                        <option value='F'>Female (F)</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="categories" class="block text-sm font-medium text-gray-700 mb-1">Select Categories:</label>
+                    <div class="dropdown">
+                        <button type="button" class="dropdown-btn" onclick="toggleDropdown('categoryDropdown')">Select Categories</button>
+                        <div id="categoryDropdown" class="dropdown-content">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="select_all_categories" onclick="toggleAllCategories(this)">
+                                <label for="select_all_categories" class="ml-2">All</label>
+                            </div>
+                            <div id="categoryCheckboxes"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rank Range/Sort By/Round Row -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <div>
+                    <label for="rank_range" class="block text-sm font-medium text-gray-700 mb-1">Rank Range:</label>
+                    <select name="rank_range" id="rank_range" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                        <option value="10000000">Start To End</option>
+                        <option value="1000000">±10 lakh</option>
+                        <option value="500000">±5 lakh</option>
+                        <option value="200000">±2 lakh</option>
+                        <option value="100000">±1 lakh</option>
+                        <option value="50000">±50k</option>
+                        <option value="20000">±20k</option>
+                        <option value="10000">±10k</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="sort_by" class="block text-sm font-medium text-gray-700 mb-1">Sort By:</label>
+                    <select id="sort_by" name="sort_by" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                        <option value="lastYearTrend">Last Year Trend</option>
+                        <option value="closing_rank">Closing Rank</option>
+                        <option value="opening_rank">Opening Rank</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="round" class="block text-sm font-medium text-gray-700 mb-1">Round:</label>
+                    <select id="round" name="round" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                        <option value="FIRST">FIRST</option>
+                        <option value="UPGRADE">UPGRADE</option>
+                        <option value="SECOND">SECOND</option>
+                        <option value="FIRST&UPGRADE">FIRST & UPGRADE</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Institute Type/City Row -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Institute Type:</label>
+                    <div class="checkbox-row">
+                        <div class="flex items-center">
+                            <input type="checkbox" name="institute_type" value="PRIVATE" class="mr-2 institute-checkbox" checked onchange="checkInstituteTypes()">
+                            <label>Private</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" name="institute_type" value="GOVT" class="mr-2 institute-checkbox" checked onchange="checkInstituteTypes()">
+                            <label>Government</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" name="institute_type" value="S.F.I." class="mr-2 institute-checkbox" checked onchange="checkInstituteTypes()">
+                            <label>Self-Financed Institute</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" name="institute_type" value="AIDED" class="mr-2 institute-checkbox" checked onchange="checkInstituteTypes()">
+                            <label>Government Aided</label>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label for="city" class="block text-sm font-medium text-gray-700 mb-1">Select City/Cities:</label>
+                    <div class="dropdown">
+                        <button type="button" class="dropdown-btn" onclick="toggleDropdown('cityDropdown')">Select Cities</button>
+                        <div id="cityDropdown" class="dropdown-content">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="select_all_cities" onclick="toggleAllCities(this)">
+                                <label for="select_all_cities" class="ml-2">All</label>
+                            </div>
+                            <% cities.forEach(function(city) { %>
+                                <div class="flex items-center">
+                                    <input type="checkbox" name="city[]" value="<%= city %>" id="city_<%= city %>" class="city-checkbox" checked>
+                                    <label class="ml-2"><%= city %></label>
+                                </div>
+                            <% }); %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- College/Branch Row -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div>
+                    <label for="college_name" class="block text-sm font-medium text-gray-700 mb-1">College Name:</label>
+                    <div class="dropdown">
+                        <button class="dropdown-btn" type="button" id="collegeDropdown">Select College Names</button>
+                        <div class="dropdown-content" id="collegeDropdownMenu">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="selectAllColleges">
+                                <label for="selectAllColleges" class="ml-2">Select All</label>
+                            </div>
+                            <% collegeNames.forEach(function(name) { %>
+                                <div class="flex items-center">
+                                    <input type="checkbox" name="college_name[]" value="<%= name %>" class="college-checkbox" checked>
+                                    <label class="ml-2"><%= name %></label>
+                                </div>
+                            <% }); %>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label for="branch" class="block text-sm font-medium text-gray-700 mb-1">Select Branch/Branches:</label>
+                    <div class="dropdown">
+                        <button type="button" class="dropdown-btn" onclick="toggleDropdown('branchDropdown')">Select Branches</button>
+                        <div id="branchDropdown" class="dropdown-content">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="select_all_branches" onclick="toggleAllBranches(this)">
+                                <label for="select_all_branches" class="ml-2">All</label>
+                            </div>
+                            <% branches.sort((a, b) => a.branch.localeCompare(b.branch)).forEach(function(branch) { %>
+                                <div class="flex items-center">
+                                    <input type="checkbox" name="branch[]" value="<%= branch.branch %>" id="branch_<%= branch.branch %>" class="branch-checkbox" checked>
+                                    <label class="ml-2"><%= branch.branch %></label>
+                                </div>
+                            <% }); %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="mt-6 text-center">
+                <button type="submit" class="bg-black text-white px-6 py-2 rounded-md">Search</button>
+            </div>
+        </form>
+
+        <!-- Info Box -->
+        <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mt-6 rounded-md">
+            <p class="flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                </svg>
+                Fill all the fields above to get better results
+            </p>
+        </div>
+    </main>
+
+    <!-- ==================== -->
+    <!--        SCRIPTS        -->
+    <!-- ==================== -->
+    <script>
+        // ==========================================
+        // DOMICILE & CASTE HANDLING
+        // ==========================================
+        function handleDomicileChange() {
+            const domicile = document.getElementById('domicile').value;
+            const casteSelect = document.getElementById('caste');
+            casteSelect.innerHTML = '';
+
+            if (domicile === 'AI') {
+                casteSelect.options.add(new Option('EWS', 'EWS'));
+                casteSelect.options.add(new Option('FW (Fee wavier)', 'FW'));
+                casteSelect.options.add(new Option('OBC', 'OBC'));
+                casteSelect.options.add(new Option('SC', 'SC'));
+                casteSelect.options.add(new Option('ST', 'ST'));
+                casteSelect.options.add(new Option('UR (Unreserved)', 'UR'));
+                casteSelect.options.add(new Option('JKM (Jammu & Kashmir Migrants)', 'JKM'));
+                casteSelect.options.add(new Option('JKR (Jammu & Kashmir Residents)', 'JKR'));
+                casteSelect.options.add(new Option('NTPC', 'NTPC'));
+            } else {
+                casteSelect.options.add(new Option('EWS', 'EWS'));
+                casteSelect.options.add(new Option('FW (Fee wavier)', 'FW'));
+                casteSelect.options.add(new Option('OBC', 'OBC'));
+                casteSelect.options.add(new Option('SC', 'SC'));
+                casteSelect.options.add(new Option('ST', 'ST'));
+                casteSelect.options.add(new Option('UR (Unreserved)', 'UR'));
+            }
+            handleCasteChange();
+        }
+
+        function handleCasteChange() {
+            const caste = document.getElementById('caste').value;
+            const classContainer = document.getElementById('class-container');
+            const genderContainer = document.getElementById('gender-container');
+
+            if (caste === 'EWS' || caste === 'NTPC' || caste === 'JKM' || caste === 'JKR') {
+                classContainer.style.display = 'none';
+                genderContainer.style.display = 'none';
+            } else if (caste === 'FW') {
+                classContainer.style.display = 'none';
+                genderContainer.style.display = 'block';
+            } else {
+                classContainer.style.display = 'block';
+                genderContainer.style.display = 'block';
+            }
+        }
+
+        // ==========================================
+        // DROPDOWN TOGGLES
+        // ==========================================
+        function toggleDropdown(dropdownId) {
+            const dropdown = document.getElementById(dropdownId);
+            dropdown.classList.toggle('show');
+        }
+
+        // Close dropdowns when clicking outside
+        window.onclick = function(event) {
+            if (!event.target.matches('.dropdown-btn')) {
+                const dropdowns = document.getElementsByClassName('dropdown-content');
+                for (let i = 0; i < dropdowns.length; i++) {
+                    const openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        if (!openDropdown.contains(event.target)) {
+                            openDropdown.classList.remove('show');
+                        }
+                    }
+                }
+            }
+        }
+
+        // College dropdown specific handling
+        document.getElementById('collegeDropdown').addEventListener('click', function() {
+            const dropdownMenu = document.getElementById('collegeDropdownMenu');
+            dropdownMenu.classList.toggle('show');
+        });
+
+        document.addEventListener('click', function(e) {
+            const dropdownMenu = document.getElementById('collegeDropdownMenu');
+            const dropdownButton = document.getElementById('collegeDropdown');
+            
+            if (!dropdownButton.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                dropdownMenu.classList.remove('show');
+            }
+        });
+
+        // ==========================================
+        // CATEGORY HANDLING
+        // ==========================================
+        function generateCategoryCheckboxes(categories) {
+            const container = document.getElementById('categoryCheckboxes');
+            container.innerHTML = '';  // Clear previous checkboxes
+            
+            categories.forEach(category => {
+                const checkboxContainer = document.createElement('div');
+                checkboxContainer.classList.add('flex', 'items-center');
+            
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.name = 'selectedCategories';
+                checkbox.value = category;
+                checkbox.id = `category_${category}`;
+                checkbox.classList.add('category-checkbox');
+                checkbox.checked = true;
+            
+                const label = document.createElement('label');
+                label.htmlFor = `category_${category}`;
+                label.textContent = category;
+                label.classList.add('ml-2');
+            
+                checkboxContainer.appendChild(checkbox);
+                checkboxContainer.appendChild(label);
+                container.appendChild(checkboxContainer);
+            });
+            
+            initializeSelectAllCategories();
+        }
+
+        function toggleAllCategories(checkbox) {
+            const categoryCheckboxes = document.querySelectorAll('.category-checkbox');
+            categoryCheckboxes.forEach(cb => {
+                cb.checked = checkbox.checked;
+                const event = new Event('change');
+                cb.dispatchEvent(event);
+            });
+        }
+
+        function initializeSelectAllCategories() {
+            const selectAllCategoriesCheckbox = document.getElementById('select_all_categories');
+            const categoryCheckboxes = document.querySelectorAll('.category-checkbox');
+            let isSelectAllTriggered = false;
+
+            const unchecked = Array.from(categoryCheckboxes).some(cb => !cb.checked);
+            if (!unchecked) {
+                selectAllCategoriesCheckbox.checked = true;
+            }
+
+            selectAllCategoriesCheckbox.addEventListener('change', function() {
+                isSelectAllTriggered = true;
+                toggleAllCategories(this);
+                isSelectAllTriggered = false;
+            });
+
+            categoryCheckboxes.forEach(cb => {
+                cb.addEventListener('change', function() {
+                    if (!this.checked) {
+                        selectAllCategoriesCheckbox.checked = false;
+                    } else {
+                        const unchecked = Array.from(categoryCheckboxes).some(cb => !cb.checked);
+                        if (!unchecked) {
+                            selectAllCategoriesCheckbox.checked = true;
+                        }
+                    }
+
+                    const checkedCount = Array.from(categoryCheckboxes).filter(chk => chk.checked).length;
+                    if (checkedCount === 0 && !isSelectAllTriggered) {
+                        alert('At least one category must be selected.');
+                        this.checked = true;
+                    }
+                });
+            });
+
+            selectAllCategoriesCheckbox.addEventListener('change', function() {
+                if (!this.checked) {
+                    const firstCheckbox = document.querySelector('.category-checkbox');
+                    if (firstCheckbox) {
+                        categoryCheckboxes.forEach(cb => cb.checked = false);
+                        firstCheckbox.checked = true;
+                        const event = new Event('change');
+                        firstCheckbox.dispatchEvent(event);
+                    }
+                }
+            });
+        }
+
+        function updateCategories() {
+            const caste = document.getElementById('caste').value || 'EWS';
+            const classType = document.getElementById('class').value || '';
+            const gender = document.getElementById('gender').value || '';
+
+            fetch(`/generate-categories?caste=${caste}&class=${classType}&gender=${gender}`)
+                .then(response => response.json())
+                .then(data => {
+                    generateCategoryCheckboxes(data.categories);
+                })
+                .catch(error => console.error('Error fetching categories:', error));
+        }
+
+        // ==========================================
+        // INSTITUTE TYPE HANDLING
+        // ==========================================
+        function checkInstituteTypes() {
+            const checkboxes = document.querySelectorAll('.institute-checkbox');
+            const checkedCount = Array.from(checkboxes).filter(checkbox => checkbox.checked).length;
+        
+            if (checkedCount === 0) {
+                alert('At least one option should be selected!');
+                checkboxes[0].checked = true;
+            }
+        }
+
+        // ==========================================
+        // CITY HANDLING
+        // ==========================================
+        function toggleAllCities(checkbox) {
+            const cityCheckboxes = document.querySelectorAll('.city-checkbox');
+            cityCheckboxes.forEach(cb => {
+                cb.checked = checkbox.checked;
+                const event = new Event('change');
+                cb.dispatchEvent(event);
+            });
+        }
+
+        function initializeSelectAllCities() {
+            const selectAllCitiesCheckbox = document.getElementById('select_all_cities');
+            const cityCheckboxes = document.querySelectorAll('.city-checkbox');
+            let isSelectAllTriggered = false;
+
+            const unchecked = Array.from(cityCheckboxes).some(cb => !cb.checked);
+            if (!unchecked) {
+                selectAllCitiesCheckbox.checked = true;
+            }
+
+            selectAllCitiesCheckbox.addEventListener('change', function() {
+                isSelectAllTriggered = true;
+                toggleAllCities(this);
+                isSelectAllTriggered = false;
+            });
+
+            cityCheckboxes.forEach(cb => {
+                cb.addEventListener('change', function() {
+                    if (!this.checked) {
+                        selectAllCitiesCheckbox.checked = false;
+                    } else {
+                        const unchecked = Array.from(cityCheckboxes).some(cb => !cb.checked);
+                        if (!unchecked) {
+                            selectAllCitiesCheckbox.checked = true;
+                        }
+                    }
+
+                    const checkedCount = Array.from(cityCheckboxes).filter(chk => chk.checked).length;
+                    if (checkedCount === 0 && !isSelectAllTriggered) {
+                        alert('At least one city must be selected.');
+                        this.checked = true;
+                    }
+                });
+            });
+
+            selectAllCitiesCheckbox.addEventListener('change', function() {
+                if (!this.checked) {
+                    const firstCheckbox = document.querySelector('.city-checkbox');
+                    if (firstCheckbox) {
+                        cityCheckboxes.forEach(cb => cb.checked = false);
+                        firstCheckbox.checked = true;
+                        const event = new Event('change');
+                        firstCheckbox.dispatchEvent(event);
+                    }
+                }
+            });
+        }
+
+        // ==========================================
+        // COLLEGE HANDLING
+        // ==========================================
+        function toggleAllColleges(checkbox) {
+            const collegeCheckboxes = document.querySelectorAll('.college-checkbox');
+            collegeCheckboxes.forEach(cb => {
+                cb.checked = checkbox.checked;
+                const event = new Event('change');
+                cb.dispatchEvent(event);
+            });
+        }
+
+        function initializeSelectAllColleges() {
+            const selectAllCollegesCheckbox = document.getElementById('selectAllColleges');
+            const collegeCheckboxes = document.querySelectorAll('.college-checkbox');
+            let isSelectAllTriggered = false;
+
+            const unchecked = Array.from(collegeCheckboxes).some(cb => !cb.checked);
+            if (!unchecked) {
+                selectAllCollegesCheckbox.checked = true;
+            }
+
+            selectAllCollegesCheckbox.addEventListener('change', function() {
+                isSelectAllTriggered = true;
+                toggleAllColleges(this);
+                isSelectAllTriggered = false;
+            });
+
+            collegeCheckboxes.forEach(cb => {
+                cb.addEventListener('change', function() {
+                    if (!this.checked) {
+                        selectAllCollegesCheckbox.checked = false;
+                    } else {
+                        const unchecked = Array.from(collegeCheckboxes).some(cb => !cb.checked);
+                        if (!unchecked) {
+                            selectAllCollegesCheckbox.checked = true;
+                        }
+                    }
+
+                    const checkedCount = Array.from(collegeCheckboxes).filter(chk => chk.checked).length;
+                    if (checkedCount === 0 && !isSelectAllTriggered) {
+                        alert('At least one college must be selected.');
+                        this.checked = true;
+                    }
+                });
+            });
+
+            selectAllCollegesCheckbox.addEventListener('change', function() {
+                if (!this.checked) {
+                    const firstCheckbox = document.querySelector('.college-checkbox');
+                    if (firstCheckbox) {
+                        collegeCheckboxes.forEach(cb => cb.checked = false);
+                        firstCheckbox.checked = true;
+                        const event = new Event('change');
+                        firstCheckbox.dispatchEvent(event);
+                    }
+                }
+            });
+        }
+
+        // ==========================================
+        // BRANCH HANDLING
+        // ==========================================
+        function toggleAllBranches(checkbox) {
+            const branchCheckboxes = document.querySelectorAll('.branch-checkbox');
+            branchCheckboxes.forEach(cb => {
+                cb.checked = checkbox.checked;
+                const event = new Event('change');
+                cb.dispatchEvent(event);
+            });
+        }
+
+        function initializeSelectAllBranches() {
+            const selectAllBranchesCheckbox = document.getElementById('select_all_branches');
+            const branchCheckboxes = document.querySelectorAll('.branch-checkbox');
+            let isSelectAllTriggered = false;
+
+            const unchecked = Array.from(branchCheckboxes).some(cb => !cb.checked);
+            if (!unchecked) {
+                selectAllBranchesCheckbox.checked = true;
+            }
+
+            selectAllBranchesCheckbox.addEventListener('change', function() {
+                isSelectAllTriggered = true;
+                toggleAllBranches(this);
+                isSelectAllTriggered = false;
+            });
+
+            branchCheckboxes.forEach(cb => {
+                cb.addEventListener('change', function() {
+                    if (!this.checked) {
+                        selectAllBranchesCheckbox.checked = false;
+                    } else {
+                        const unchecked = Array.from(branchCheckboxes).some(cb => !cb.checked);
+                        if (!unchecked) {
+                            selectAllBranchesCheckbox.checked = true;
+                        }
+                    }
+
+                    const checkedCount = Array.from(branchCheckboxes).filter(chk => chk.checked).length;
+                    if (checkedCount === 0 && !isSelectAllTriggered) {
+                        alert('At least one branch must be selected.');
+                        this.checked = true;
+                    }
+                });
+            });
+
+            selectAllBranchesCheckbox.addEventListener('change', function() {
+                if (!this.checked) {
+                    const firstCheckbox = document.querySelector('.branch-checkbox');
+                    if (firstCheckbox) {
+                        branchCheckboxes.forEach(cb => cb.checked = false);
+                        firstCheckbox.checked = true;
+                        const event = new Event('change');
+                        firstCheckbox.dispatchEvent(event);
+                    }
+                }
+            });
+        }
+
+        // ==========================================
+        // DYNAMIC UPDATES (Cities/Colleges/Branches)
+        // ==========================================
+        function updateCities() {
+            const selectedInstituteTypes = Array.from(document.querySelectorAll('input[name="institute_type"]:checked')).map(cb => cb.value);
+
+            if (selectedInstituteTypes.length === 0) {
+                console.log("No institute types selected.");
+                return;
+            }
+
+            fetch('/update-cities', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ institute_types: selectedInstituteTypes }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const cityDropdown = document.getElementById('cityDropdown');
+                cityDropdown.innerHTML = `
+                    <input type="checkbox" id="select_all_cities" onclick="toggleAllCities(this)"> <label for="select_all_cities">All</label><br>
+                `;
+                data.cities.forEach(city => {
+                    cityDropdown.innerHTML += `
+                        <label>
+                            <input type="checkbox" name="city[]" value="${city}" id="city_${city}" class="city-checkbox" checked>
+                            ${city}
+                        </label><br>
+                    `;
+                });
+                initializeSelectAllCities();
+                attachCityEventListeners();
+                updateColleges();
+            })
+            .catch(error => console.error('Error updating cities:', error));
+        }
+
+        function updateColleges() {
+            const selectedInstituteTypes = Array.from(document.querySelectorAll('input[name="institute_type"]:checked')).map(cb => cb.value);
+            const selectedCities = Array.from(document.querySelectorAll('input[name="city[]"]:checked')).map(cb => cb.value);
+
+            if (selectedInstituteTypes.length === 0 || selectedCities.length === 0) {
+                console.log("No institute types or cities selected.");
+                return;
+            }
+
+            fetch('/update-colleges', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ institute_types: selectedInstituteTypes, cities: selectedCities }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const collegeDropdown = document.getElementById('collegeDropdownMenu');
+                collegeDropdown.innerHTML = `
+                    <label>
+                        <input type="checkbox" id="selectAllColleges"> Select All
+                    </label>
+                `;
+                data.colleges.forEach(college => {
+                    collegeDropdown.innerHTML += `
+                        <label>
+                            <input type="checkbox" name="college_name[]" value="${college}" class="college-checkbox" checked>
+                            ${college}
+                        </label>
+                    `;
+                });
+                initializeSelectAllColleges();
+                attachCollegeEventListeners();
+                updateBranches();
+            })
+            .catch(error => console.error('Error updating colleges:', error));
+        }
+
+        function updateBranches() {
+            const selectedColleges = Array.from(document.querySelectorAll('input[name="college_name[]"]:checked')).map(cb => cb.value);
+
+            if (selectedColleges.length === 0) {
+                console.log("No colleges selected.");
+                return;
+            }
+
+            fetch('/update-branches', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ colleges: selectedColleges }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const branchDropdown = document.getElementById('branchDropdown');
+                branchDropdown.innerHTML = `
+                    <input type="checkbox" id="select_all_branches" onclick="toggleAllBranches(this)"> <label for="select_all_branches">All</label><br>
+                `;
+                data.branches.forEach(branch => {
+                    branchDropdown.innerHTML += `
+                        <label>
+                            <input type="checkbox" name="branch[]" value="${branch}" id="branch_${branch}" class="branch-checkbox" checked>
+                            ${branch}
+                        </label><br>
+                    `;
+                });
+
+                initializeSelectAllBranches();
+            })
+            .catch(error => console.error('Error updating branches:', error));
+        }
+
+        function attachCityEventListeners() {
+            document.querySelectorAll('input[name="city[]"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    updateColleges();
+                });
+            });
+        }
+
+        function attachCollegeEventListeners() {
+            document.querySelectorAll('input[name="college_name[]"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    updateBranches();
+                });
+            });
+        }
+
+        // ==========================================
+        // INITIALIZATION
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize domicile and caste
+            handleDomicileChange();
+            
+            // Initialize category checkboxes
+            updateCategories();
+            
+            // Set up event listeners for dynamic updates
+            document.getElementById('caste').addEventListener('change', updateCategories);
+            document.getElementById('class').addEventListener('change', updateCategories);
+            document.getElementById('gender').addEventListener('change', updateCategories);
+            document.getElementById('domicile').addEventListener('change', updateCategories);
+
+            // Initialize "Select All" functionality
+            initializeSelectAllCities();
+            initializeSelectAllColleges();
+            initializeSelectAllBranches();
+
+            // Attach institute type listeners
+            document.querySelectorAll('input[name="institute_type"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    updateCities();
+                });
+            });
+
+            // Initial attachment of city and college event listeners
+            attachCityEventListeners();
+            attachCollegeEventListeners();
+        });
+    </script>
+</body>
+</html>
