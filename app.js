@@ -8,7 +8,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 const app = express();
 const port = process.env.PORT || 3000;
-
+app.set('trust proxy', 1);
 // Middleware
 app.use(express.static('public'));
 app.use(express.json());
@@ -42,8 +42,8 @@ pool.connect()
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: 'https://prefrencer.onrender.com/auth/google/callback'
-
+    callbackURL:'http://localhost:3000/auth/google/callback' 
+        
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         const { rows: existingUser } = await pool.query(
