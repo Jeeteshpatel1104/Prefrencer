@@ -43,7 +43,8 @@ passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL:'https://prefrencer.onrender.com/auth/google/callback' 
-        
+    // callbackURL:'https://prefrencer.onrender.com/auth/google/callback' 
+        	// http://localhost:3000/auth/google/callback
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         const { rows: existingUser } = await pool.query(
@@ -206,8 +207,8 @@ app.post('/update-branches', async (req, res) => {
             'SELECT DISTINCT branch FROM data_table WHERE college_name = ANY($1) AND year = 2024',
             [req.body.colleges || []]
         );
-        // Return objects to match main route format
-        res.json({ branches: rows });
+        // Return array of branch names (strings)
+        res.json({ branches: rows.map(row => row.branch) });
     } catch (err) {
         console.error('Branches update error:', err);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -225,14 +226,28 @@ app.post('/search', ensureAuthenticated, async (req, res) => {
         const selectedCaste = req.body.caste;
         const selectedClass = req.body.class;
         const selectedGender = req.body.gender;
-        const selectedCollegeNames = req.body.college_name || [];
-        const instituteTypes = req.body.institute_type || [];
-        const selectedCities = req.body.city || [];
+      //  const selectedCollegeNames = req.body.college_name || [];
+        //const instituteTypes = req.body.institute_type || [];
+        //const selectedCities = req.body.city || [];
         const selectedRound = req.body.round;
         const rankRange = parseInt(req.body.rank_range);
         const domicile = req.body.domicile;
         const sortBy = req.body.sort_by || 'closing_rank';
-        const selectedBranches = req.body.branch || [];
+        //const selectedBranches = req.body.branch || [];
+
+
+
+        function ensureArray(val) {
+    if (Array.isArray(val)) return val;
+    if (val === undefined || val === null) return [];
+    return [val];
+}
+
+const selectedCollegeNames = ensureArray(req.body.college_name);
+const instituteTypes = ensureArray(req.body.institute_type);
+const selectedCities = ensureArray(req.body.city);
+const selectedBranches = ensureArray(req.body.branch);
+// const selectedCategories = ensureArray(req.body.selectedCategories);
 
         const lowerBound = rank - rankRange;
         const upperBound = rank + rankRange;
