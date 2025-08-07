@@ -42,7 +42,7 @@ pool.connect()
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL:'https://prefrencer.onrender.com/auth/google/callback' 
+    callbackURL:'http://localhost:3000/auth/google/callback' 
         
 }, async (accessToken, refreshToken, profile, done) => {
     try {
@@ -238,11 +238,17 @@ app.post('/search', ensureAuthenticated, async (req, res) => {
         const upperBound = rank + rankRange;
 
         // Generate categories
-        const selectedCategories = req.body.selectedCategories || [];
-        const categories = selectedCategories.length > 0 ? 
-            selectedCategories : 
-            generateCategories(selectedCaste, selectedClass, selectedGender);
+      let selectedCategories = req.body.selectedCategories || [];
+      if (!Array.isArray(selectedCategories)) {
+        selectedCategories = [selectedCategories];
+     }
+let categories = selectedCategories.length > 0 ? 
+    selectedCategories : 
+    generateCategories(selectedCaste, selectedClass, selectedGender);
 
+if (!Array.isArray(categories)) {
+    categories = [categories];
+}
         // Create condition for selected categories
         const categoryCondition = categories.length > 0 ? 
             `allotted_category = ANY($8)` : 
