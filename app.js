@@ -42,7 +42,7 @@ pool.connect()
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL:'https://prefrencer.onrender.com/auth/google/callback' 
+    callbackURL:'http://localhost:3000/auth/google/callback' 
     // callbackURL:'https://prefrencer.onrender.com/auth/google/callback' 
         	// http://localhost:3000/auth/google/callback
 }, async (accessToken, refreshToken, profile, done) => {
@@ -170,12 +170,20 @@ app.get('/', ensureAuthenticated, async (req, res) => {
     }
 });
 
+
+ function ensureArray(val) {
+    if (Array.isArray(val)) return val;
+    if (val === undefined || val === null) return [];
+    return [val];
+}
+
 // AJAX Routes (Maintain object structure for consistency)
 app.post('/update-cities', async (req, res) => {
     try {
+        const instituteTypes = ensureArray(req.body.institute_types);
         const { rows } = await pool.query(
             'SELECT DISTINCT city FROM data_table WHERE institute_type = ANY($1) AND year = 2024',
-            [req.body.institute_types || []]
+            [instituteTypes]
         );
         res.json({ cities: rows.map(row => row.city).sort() });
     } catch (err) {
@@ -186,13 +194,15 @@ app.post('/update-cities', async (req, res) => {
 
 app.post('/update-colleges', async (req, res) => {
     try {
+        const instituteTypes = ensureArray(req.body.institute_types);
+        const cities = ensureArray(req.body.cities);
         const { rows } = await pool.query(
             `SELECT DISTINCT college_name FROM data_table 
              WHERE institute_type = ANY($1) 
              AND city = ANY($2)
              AND year = 2024
              ORDER BY college_name ASC`,
-            [req.body.institute_types || [], req.body.cities || []]
+            [instituteTypes, cities]
         );
         res.json({ colleges: rows.map(row => row.college_name) });
     } catch (err) {
@@ -237,11 +247,7 @@ app.post('/search', ensureAuthenticated, async (req, res) => {
 
 
 
-        function ensureArray(val) {
-    if (Array.isArray(val)) return val;
-    if (val === undefined || val === null) return [];
-    return [val];
-}
+
 
 const selectedCollegeNames = ensureArray(req.body.college_name);
 const instituteTypes = ensureArray(req.body.institute_type);
