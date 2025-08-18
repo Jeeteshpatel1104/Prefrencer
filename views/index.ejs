@@ -4,147 +4,281 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>College Preference Finder</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
     <style>
-        body {
-            background-color: #e3e3ed;
-            background-image: 
-                linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px; /* controls grid spacing */
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #06d6a0;
+            --accent: #ff6b6b;
+            --light: #f8f9fa;
+            --dark: #1e293b;
+            --text: #334155;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-    
-        .dropdown {
-            position: relative;
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: linear-gradient(135deg, #f0f4f8 0%, #e6e9f0 100%); min-height: 100vh; color: var(--text); padding: 20px; position: relative; overflow-x: hidden; }
+        body::before { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px); background-size: 40px 40px; z-index: -1; }
+        .decoration { position: absolute; z-index: 0; }
+        .decoration-1 { top: 50px; right: 50px; width: 150px; height: 150px; border-radius: 50%; background: linear-gradient(135deg, var(--primary) 0%, #5e72e4 100%); opacity: 0.1; }
+        .decoration-2 { bottom: 50px; left: 50px; width: 200px; height: 200px; border-radius: 50%; background: linear-gradient(135deg, var(--secondary) 0%, #06b6d4 100%); opacity: 0.08; }
+        /* Header */
+    header {
+      background: white;
+      box-shadow: var(--shadow);
+      border-radius: 16px;
+      max-width: 1200px;
+      margin: 0 auto 30px;
+      padding: 15px 30px;
+    }
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header-logo {
+      height: 40px;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .user-name {
+      font-weight: 500;
+      color: var(--dark);
+      font-size: 15px;
+    }
+
+    .logout-btn {
+      background: linear-gradient(to right, var(--primary), var(--primary-dark));
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .logout-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+    }
+        .container { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; padding: 0 20px; }
+        .back-nav { margin-bottom: 30px; }
+        .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--primary); font-weight: 500; text-decoration: none; padding: 8px 16px; border-radius: 8px; transition: var(--transition); }
+        .back-link:hover { background: rgba(67, 97, 238, 0.1); transform: translateX(-5px); }
+        .back-link i { font-size: 18px; }
+        .hero { text-align: center; margin-bottom: 40px; position: relative; }
+        .hero-logo { width: 100px; height: 100px; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; background: white; border-radius: 50%; box-shadow: var(--shadow); padding: 15px; }
+        .hero-title { font-size: 2.8rem; font-weight: 700; color: var(--dark); margin-bottom: 10px; letter-spacing: -0.5px; }
+        .hero-tag { display: inline-flex; align-items: center; gap: 8px; background: rgba(6, 214, 160, 0.15); color: #06a17e; padding: 8px 20px; border-radius: 50px; font-weight: 500; margin-top: 10px; }
+        .form-container { background: white; border-radius: 20px; box-shadow: var(--shadow); padding: 40px; margin-bottom: 40px; position: relative; z-index: 2; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-bottom: 25px; }
+        .form-group { margin-bottom: 0; }
+        .form-label { display: block; font-size: 15px; font-weight: 500; color: var(--dark); margin-bottom: 10px; }
+        /* Inputs and selects share the same rounded, elevated appearance used by the custom dropdowns */
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 20px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 15px;
+            transition: var(--transition);
+            background: #f9fafc;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.08);
+            /* make native selects behave/look consistently across browsers */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
             display: inline-block;
-            width: 100%;
+            line-height: 1.2;
         }
-    
-        .dropdown-btn {
-            background-color: #f3f4f6;
-            color: rgb(0, 0, 0);
-            padding: 10px;
-            border: none;
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.15);
+            background: white;
+        }
+
+        /* Make the select show a custom caret and reserve space for it so the select looks like the rounded dropdown button */
+        .form-select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 18px center;
+            background-size: 16px;
+            padding-right: 44px; /* leave space for the caret so text doesn't overlap */
             cursor: pointer;
-            border-radius: 4px;
-            width: 100%;
-            text-align: left;
         }
-    
-        .dropdown-btn:hover {
-            background-color: #ffffff;
-        }
-    
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: #ffffff;
-            padding: 10px;
-            border-radius: 4px;
-            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-            z-index: 1;
-            max-height: 200px;
-            overflow-y: auto;
-            width: 100%;
-        }
-    
-        .dropdown-content.show {
-            display: block;
-        }
-    
-        .dropdown-content label {
-            display: flex;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-    
-        .dropdown-content input[type="checkbox"] {
-            margin-right: 10px;
-        }
-    
-        .checkbox-row {
-            display: flex;
-            flex-wrap: wrap;
-        }
-    
-        .checkbox-row label {
-            margin-right: 10px;
-        }
-    </style>
-    
+        .dropdown { position: relative; width: 100%; }
+        .dropdown-btn { width: 100%; padding: 14px 20px; background: #f9fafc; border: 1px solid var(--border); border-radius: 12px; font-size: 15px; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: var(--transition); box-shadow: 0 4px 15px rgba(67, 97, 238, 0.08); }
+        .dropdown-btn:hover { background: white; border-color: var(--primary); }
+        .dropdown-btn i { font-size: 18px; transition: var(--transition); }
+        .dropdown-content { display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border); border-radius: 12px; padding: 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); z-index: 10; max-height: 250px; overflow-y: auto; margin-top: 5px; }
+        .dropdown-content.show { display: block; }
+        .dropdown-header { display: flex; align-items: center; padding: 8px 0; margin-bottom: 10px; border-bottom: 1px solid var(--border); }
+        .dropdown-option { display: flex; align-items: center; padding: 10px 0; cursor: pointer; }
+        .dropdown-option input { margin-right: 12px; }
+        .dropdown-option:hover { color: var(--primary); }
+        .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 10px; }
+        .checkbox-item { display: flex; align-items: center; }
+        .checkbox-item input { margin-right: 10px; }
+        .submit-btn { display: block; margin: 40px auto 0; background: linear-gradient(to right, var(--primary), var(--primary-dark)); color: white; border: none; border-radius: 12px; padding: 16px 50px; font-size: 18px; font-weight: 600; cursor: pointer; transition: var(--transition); box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3); }
+        .submit-btn:hover { background: linear-gradient(to right, var(--primary-dark), #2f44c0); transform: translateY(-3px); box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4); }
+        .info-box { background: rgba(255, 229, 100, 0.2); border-left: 4px solid #ffd43b; color: #8e7b0c; padding: 20px; border-radius: 12px; display: flex; align-items: flex-start; gap: 15px; max-width: 800px; margin: 0 auto; }
+        .info-icon { font-size: 24px; color: #f59f00; flex-shrink: 0; }
+        .info-text { font-size: 15px; line-height: 1.6; }
+    @media (max-width: 1024px) { .hero-title { font-size: 2.4rem; } .form-container { padding: 30px; } }
+    /* Advanced filters box */
+    /* Advanced filters toggle */
+/* Advanced filters toggle */
+#advanced-filters-toggle {
+    text-align: center;
+    margin: 1rem 0 1.5rem;
+}
+
+/* Main button styles */
+#show-advanced-btn {
+    background: transparent;
+    color: #333;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Chevron before text - points down by default (show more) */
+#show-advanced-btn::before {
+    content: "‹‹";              /* Double chevron */
+    display: inline-block;
+    font-weight: 900;
+    font-size: 1.2rem;          /* Bigger size */
+    transform: rotate(-90deg);   /* Points down */
+    transition: transform 0.3s ease;
+    margin-right: 0.5rem;
+    line-height: 1;
+}
+
+/* Chevron points up when expanded (hide options) */
+#advanced-filters-toggle.show #show-advanced-btn::before {
+    transform: rotate(90deg); /* Points up */
+}
+
+#show-advanced-btn:hover {
+    color: #000;
+}
+
+/* Filters container styles remain unchanged */
+#advanced-filters {
+    display: none;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+#advanced-filters.show {
+    display: block;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
 </head>
+<body>
+    <!-- Decorative Elements -->
+    <div class="decoration decoration-1"></div>
+    <div class="decoration decoration-2"></div>
 
-<body class="font-sans">
-    <!-- ==================== -->
-    <!--        HEADER         -->
-    <!-- ==================== -->
-    <header class="bg-white shadow-sm">
-        <div class="container mx-auto px-4 py-2 flex justify-between items-center">
-            <img src="/images/MargDarshak.png" alt="MargDarshak logo" class="h-10">
+    <!-- Header -->
+    <header>
+    <div class="header-content">
+      <img src="/images/MargDarshak.png" alt="MargDarshak logo" class="header-logo">
+      <div class="user-info">
+        <% if (typeof user !== 'undefined' && user) { %>
+          <span class="user-name">Welcome, <%= user.name || user.displayName || user.email %></span>
+          <a href="/logout" class="logout-btn"><i class='bx bx-log-out'></i> Logout</a>
+        <% } else { %>
+          <a href="/login" class="logout-btn"><i class='bx bx-log-in'></i> Login</a>
+        <% } %>
+      </div>
+    </div>
+  </header>
 
-            <% if (locals.user) { %>
-                <div class="flex items-center space-x-4">
-                    <span class="text-sm text-gray-600">Welcome, <%= user.name %></span>
-                    <a href="/logout" class="text-sm text-blue-600 hover:text-blue-800">Logout</a>
-                </div>
-            <% } %>
-        </div>
-    </header>
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Back Navigation -->
+        
 
-    <!-- ==================== -->
-    <!--        MAIN           -->
-    <!-- ==================== -->
-    <main class="container mx-auto px-4 py-8">
-        <nav class="mb-6">
-            <a href="#" class="text-blue-600 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10.707 3.293a1 1 0 010 1.414L6.414 9H17a1 1 0 110 2H6.414l4.293 4.293a1 1 0 11-1.414 1.414l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 0z" clip-rule="evenodd" />
+        <!-- Hero Section -->
+        <div class="hero">
+            <div class="hero-logo">
+                <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="48" fill="#4361ee" opacity="0.1"/>
+                    <path d="M50 20 L70 40 L65 70 L35 70 L30 40 Z" fill="#4361ee"/>
+                    <circle cx="50" cy="35" r="8" fill="#06d6a0"/>
+                    <circle cx="50" cy="55" r="5" fill="white"/>
                 </svg>
-                Back
-            </a>
-        </nav>
-
-        <div class="text-center mb-8">
-            <img src="/images/MargDarshak.png" alt="MargDarshak logo" class="mx-auto mb-4 h-16">
-            <h1 class="text-4xl font-bold mb-2">College Preference Finder</h1>
-            <p class="text-green-600 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
-                No Hidden Charges, 100% Free
-            </p>
+            </div>
+            <h1 class="hero-title">College Preference Finder</h1>
+            <div class="hero-tag">
+                <i class='bx bx-check-circle'></i> No Hidden Charges, 100% Free
+            </div>
         </div>
 
-        <!-- ==================== -->
-        <!--        FORM           -->
-        <!-- ==================== -->
-        <form action="/search" method="POST" class="bg-white shadow-md rounded-lg p-6">
+        <!-- Form Container -->
+        <form action="/search" method="POST" class="form-container">
             <!-- Rank/Domicile/Caste Row -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <label for="rank" class="block text-sm font-medium text-gray-700 mb-1">Rank:</label>
-                    <input type="number" id="rank" name="rank" class="w-full px-3 py-2 border border-gray-300 rounded-md" required>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label" for="rank">Rank:</label>
+                    <input type="number" id="rank" name="rank" class="form-input" required>
                 </div>
-                <div>
-                    <label for="domicile" class="block text-sm font-medium text-gray-700 mb-1">Domicile:</label>
-                    <select id="domicile" name="domicile" class="w-full px-3 py-2 border border-gray-300 rounded-md" onchange="handleDomicileChange()" required>
+                <div class="form-group">
+                    <label class="form-label" for="domicile">Domicile:</label>
+                    <select id="domicile" name="domicile" class="form-select" onchange="handleDomicileChange()" required>
                         <option value='AI'>All India</option>
                         <option value='Y'>MP Resident</option>
                     </select>
                 </div>
-                <div>
-                    <label for="caste" class="block text-sm font-medium text-gray-700 mb-1">Caste:</label>
-                    <select id="caste" name="caste" class="w-full px-3 py-2 border border-gray-300 rounded-md" onchange="handleCasteChange()" required></select>
+                <div class="form-group">
+                    <label class="form-label" for="caste">Caste:</label>
+                    <select id="caste" name="caste" class="form-select" onchange="handleCasteChange()" required></select>
                 </div>
             </div>
 
             <!-- Class/Gender/Categories Row -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                <div id="class-container">
-                    <label for="class" class="block text-sm font-medium text-gray-700 mb-1">Class:</label>
-                    <select id="class" name="class" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+            <div class="form-grid">
+                <div class="form-group" id="class-container">
+                    <label class="form-label" for="class">Class:</label>
+                    <select id="class" name="class" class="form-select">
                         <option value='X'>NILL (X)</option>
                         <option value='H'>Handicapped (H)</option>
                         <option value='S'>Sainik (S)</option>
@@ -152,33 +286,33 @@
                         <option value='FF'>Freedom Fighter (FF)</option>
                     </select>
                 </div>
-                <div id="gender-container">
-                    <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Gender:</label>
-                    <select id="gender" name="gender" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                <div class="form-group" id="gender-container">
+                    <label class="form-label" for="gender">Gender:</label>
+                    
+                    <select id="gender" name="gender" class="form-select">
                         <option value='OP'>Open (OP)</option>
                         <option value='F'>Female (F)</option>
                     </select>
+                   
                 </div>
-                <div>
-                    <label for="categories" class="block text-sm font-medium text-gray-700 mb-1">Select Categories:</label>
+                <div class="form-group">
+                    <label class="form-label">Select Categories:</label>
                     <div class="dropdown">
-                        <button type="button" class="dropdown-btn" onclick="toggleDropdown('categoryDropdown')">Select Categories</button>
+                        <button type="button" class="dropdown-btn" onclick="toggleDropdown('categoryDropdown')">
+                            Select Categories <i class='bx bx-chevron-down'></i>
+                        </button>
                         <div id="categoryDropdown" class="dropdown-content">
-                            <div class="flex items-center">
-                                <input type="checkbox" id="select_all_categories" onclick="toggleAllCategories(this)">
-                                <label for="select_all_categories" class="ml-2">All</label>
-                            </div>
                             <div id="categoryCheckboxes"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Rank Range/Sort By/Round Row -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                <div>
-                    <label for="rank_range" class="block text-sm font-medium text-gray-700 mb-1">Rank Range:</label>
-                    <select name="rank_range" id="rank_range" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+            <!-- Rank Range/Sort By/Round (visible by default) -->
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label" for="rank_range">Rank Range:</label>
+                    <select name="rank_range" id="rank_range" class="form-select">
                         <option value="10000000">Start To End</option>
                         <option value="1000000">±10 lakh</option>
                         <option value="500000">±5 lakh</option>
@@ -189,17 +323,17 @@
                         <option value="10000">±10k</option>
                     </select>
                 </div>
-                <div>
-                    <label for="sort_by" class="block text-sm font-medium text-gray-700 mb-1">Sort By:</label>
-                    <select id="sort_by" name="sort_by" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                <div class="form-group">
+                    <label class="form-label" for="sort_by">Sort By:</label>
+                    <select id="sort_by" name="sort_by" class="form-select">
                         <option value="lastYearTrend">Last Year Trend</option>
                         <option value="closing_rank">Closing Rank</option>
                         <option value="opening_rank">Opening Rank</option>
                     </select>
                 </div>
-                <div>
-                    <label for="round" class="block text-sm font-medium text-gray-700 mb-1">Round:</label>
-                    <select id="round" name="round" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                <div class="form-group">
+                    <label class="form-label" for="round">Round:</label>
+                    <select id="round" name="round" class="form-select">
                         <option value="FIRST">FIRST</option>
                         <option value="UPGRADE">UPGRADE</option>
                         <option value="SECOND">SECOND</option>
@@ -207,110 +341,85 @@
                     </select>
                 </div>
             </div>
-
-            <!-- Institute Type/City Row -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Institute Type:</label>
-                    <div class="checkbox-row">
-                        <div class="flex items-center">
-                            <input type="checkbox" name="institute_type" value="PRIVATE" class="mr-2 institute-checkbox" checked onchange="checkInstituteTypes()">
-                            <label>Private</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" name="institute_type" value="GOVT" class="mr-2 institute-checkbox" checked onchange="checkInstituteTypes()">
-                            <label>Government</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" name="institute_type" value="S.F.I." class="mr-2 institute-checkbox" checked onchange="checkInstituteTypes()">
-                            <label>Self-Financed Institute</label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" name="institute_type" value="AIDED" class="mr-2 institute-checkbox" checked onchange="checkInstituteTypes()">
-                            <label>Government Aided</label>
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <label for="city" class="block text-sm font-medium text-gray-700 mb-1">Select City/Cities:</label>
-                    <div class="dropdown">
-                        <button type="button" class="dropdown-btn" onclick="toggleDropdown('cityDropdown')">Select Cities</button>
-                        <div id="cityDropdown" class="dropdown-content">
-                            <div class="flex items-center">
-                                <input type="checkbox" id="select_all_cities" onclick="toggleAllCities(this)">
-                                <label for="select_all_cities" class="ml-2">All</label>
-                            </div>
-                            <% cities.forEach(function(city) { %>
-                                <div class="flex items-center">
-                                    <input type="checkbox" name="city[]" value="<%= city %>" id="city_<%= city %>" class="city-checkbox" checked>
-                                    <label class="ml-2"><%= city %></label>
-                                </div>
-                            <% }); %>
-                        </div>
-                    </div>
-                </div>
+            <!-- Advanced toggle button -->
+            <div id="advanced-filters-toggle" style="text-align:center; margin-bottom:12px;">
+                <button type="button" id="show-advanced-btn" class="filter-btn">Show Advanced Filters</button>
             </div>
-
-            <!-- College/Branch Row -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <div>
-                    <label for="college_name" class="block text-sm font-medium text-gray-700 mb-1">College Name:</label>
-                    <div class="dropdown">
-                        <button class="dropdown-btn" type="button" id="collegeDropdown">Select College Names</button>
-                        <div class="dropdown-content" id="collegeDropdownMenu">
-                            <div class="flex items-center">
-                                <input type="checkbox" id="selectAllColleges">
-                                <label for="selectAllColleges" class="ml-2">Select All</label>
+            <div id="advanced-filters" class="advanced-box">
+                <!-- Institute Type/City Row (advanced) -->
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Institute Type:</label>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="institute_type" value="PRIVATE" class="institute-checkbox" checked onchange="checkInstituteTypes()">
+                                <label>Private</label>
                             </div>
-                            <% collegeNames.forEach(function(name) { %>
-                                <div class="flex items-center">
-                                    <input type="checkbox" name="college_name[]" value="<%= name %>" class="college-checkbox" checked>
-                                    <label class="ml-2"><%= name %></label>
-                                </div>
-                            <% }); %>
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="institute_type" value="GOVT" class="institute-checkbox" checked onchange="checkInstituteTypes()">
+                                <label>Government</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="institute_type" value="S.F.I." class="institute-checkbox" checked onchange="checkInstituteTypes()">
+                                <label>Self-Financed Institute</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="institute_type" value="AIDED" class="institute-checkbox" checked onchange="checkInstituteTypes()">
+                                <label>Government Aided</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Select City/Cities:</label>
+                        <div class="dropdown">
+                            <button type="button" class="dropdown-btn" onclick="toggleDropdown('cityDropdown')">
+                                Select Cities <i class='bx bx-chevron-down'></i>
+                            </button>
+                            <div id="cityDropdown" class="dropdown-content">
+                                <div id="cityCheckboxes"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div>
-                    <label for="branch" class="block text-sm font-medium text-gray-700 mb-1">Select Branch/Branches:</label>
-                    <div class="dropdown">
-                        <button type="button" class="dropdown-btn" onclick="toggleDropdown('branchDropdown')">Select Branches</button>
-                        <div id="branchDropdown" class="dropdown-content">
-                            <div class="flex items-center">
-                                <input type="checkbox" id="select_all_branches" onclick="toggleAllBranches(this)">
-                                <label for="select_all_branches" class="ml-2">All</label>
+
+                <!-- College/Branch Row (advanced) -->
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">College Name:</label>
+                        <div class="dropdown">
+                            <button type="button" class="dropdown-btn" onclick="toggleDropdown('collegeDropdown')">
+                                Select College Names <i class='bx bx-chevron-down'></i>
+                            </button>
+                            <div id="collegeDropdown" class="dropdown-content">
+                                <div id="collegeCheckboxes"></div>
                             </div>
-                            <% branches.sort((a, b) => a.branch.localeCompare(b.branch)).forEach(function(branch) { %>
-                                <div class="flex items-center">
-                                    <input type="checkbox" name="branch[]" value="<%= branch.branch %>" id="branch_<%= branch.branch %>" class="branch-checkbox" checked>
-                                    <label class="ml-2"><%= branch.branch %></label>
-                                </div>
-                            <% }); %>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Select Branch/Branches:</label>
+                        <div class="dropdown">
+                            <button type="button" class="dropdown-btn" onclick="toggleDropdown('branchDropdown')">
+                                Select Branches <i class='bx bx-chevron-down'></i>
+                            </button>
+                            <div id="branchDropdown" class="dropdown-content">
+                                <div id="branchCheckboxes"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Submit Button -->
-            <div class="mt-6 text-center">
-                <button type="submit" class="bg-black text-white px-6 py-2 rounded-md">Search</button>
-            </div>
+            <button type="submit" class="submit-btn">Search Colleges</button>
         </form>
 
         <!-- Info Box -->
-        <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mt-6 rounded-md">
-            <p class="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                </svg>
-                Fill all the fields above to get better results
-            </p>
+        <div class="info-box">
+            <i class='bx bx-info-circle info-icon'></i>
+            <p class="info-text">Fill all the fields above to get personalized college recommendations based on your JEE Mains rank and preferences.</p>
         </div>
-    </main>
+    </div>
 
-    <!-- ==================== -->
-    <!--        SCRIPTS        -->
-    <!-- ==================== -->
     <script>
         // ==========================================
         // DOMICILE & CASTE HANDLING
@@ -322,21 +431,21 @@
 
             if (domicile === 'AI') {
                 casteSelect.options.add(new Option('EWS', 'EWS'));
-                casteSelect.options.add(new Option('FW (Fee wavier)', 'FW'));
                 casteSelect.options.add(new Option('OBC', 'OBC'));
                 casteSelect.options.add(new Option('SC', 'SC'));
                 casteSelect.options.add(new Option('ST', 'ST'));
                 casteSelect.options.add(new Option('UR (Unreserved)', 'UR'));
+                casteSelect.options.add(new Option('FW (Fee wavier)', 'FW'));
                 casteSelect.options.add(new Option('JKM (Jammu & Kashmir Migrants)', 'JKM'));
                 casteSelect.options.add(new Option('JKR (Jammu & Kashmir Residents)', 'JKR'));
                 casteSelect.options.add(new Option('NTPC', 'NTPC'));
             } else {
                 casteSelect.options.add(new Option('EWS', 'EWS'));
-                casteSelect.options.add(new Option('FW (Fee wavier)', 'FW'));
                 casteSelect.options.add(new Option('OBC', 'OBC'));
                 casteSelect.options.add(new Option('SC', 'SC'));
                 casteSelect.options.add(new Option('ST', 'ST'));
                 casteSelect.options.add(new Option('UR (Unreserved)', 'UR'));
+                casteSelect.options.add(new Option('FW (Fee wavier)', 'FW'));
             }
             handleCasteChange();
         }
@@ -364,6 +473,13 @@
         function toggleDropdown(dropdownId) {
             const dropdown = document.getElementById(dropdownId);
             dropdown.classList.toggle('show');
+            const btn = document.querySelector(`[onclick="toggleDropdown('${dropdownId}')"]`);
+            const icon = btn.querySelector('i');
+            if (dropdown.classList.contains('show')) {
+                icon.className = 'bx bx-chevron-up';
+            } else {
+                icon.className = 'bx bx-chevron-down';
+            }
         }
 
         // Close dropdowns when clicking outside
@@ -375,37 +491,56 @@
                     if (openDropdown.classList.contains('show')) {
                         if (!openDropdown.contains(event.target)) {
                             openDropdown.classList.remove('show');
+                            const btn = document.querySelector(`[onclick="toggleDropdown('${openDropdown.id}')"]`);
+                            if (btn) {
+                                const icon = btn.querySelector('i');
+                                icon.className = 'bx bx-chevron-down';
+                            }
                         }
                     }
                 }
             }
         }
 
-        // College dropdown specific handling
-        document.getElementById('collegeDropdown').addEventListener('click', function() {
-            const dropdownMenu = document.getElementById('collegeDropdownMenu');
-            dropdownMenu.classList.toggle('show');
-        });
-
-        document.addEventListener('click', function(e) {
-            const dropdownMenu = document.getElementById('collegeDropdownMenu');
-            const dropdownButton = document.getElementById('collegeDropdown');
-            
-            if (!dropdownButton.contains(e.target) && !dropdownMenu.contains(e.target)) {
-                dropdownMenu.classList.remove('show');
-            }
-        });
-
         // ==========================================
         // CATEGORY HANDLING
         // ==========================================
         function generateCategoryCheckboxes(categories) {
             const container = document.getElementById('categoryCheckboxes');
-            container.innerHTML = '';  // Clear previous checkboxes
+            container.innerHTML = '';
+            
+            // Only one 'All' row, with partition line below
+            const allRow = document.createElement('div');
+            allRow.className = 'dropdown-option';
+
+            const selectAll = document.createElement('input');
+            selectAll.type = 'checkbox';
+            selectAll.id = 'select_all_categories';
+            selectAll.className = 'select-all';
+
+            const allLabel = document.createElement('label');
+            allLabel.htmlFor = selectAll.id;
+            allLabel.className = 'ml-2';
+            allLabel.textContent = 'All';
+            // Make label clickable to toggle checkbox
+            allLabel.addEventListener('click', function(e) {
+                selectAll.checked = !selectAll.checked;
+                selectAll.dispatchEvent(new Event('change'));
+            });
+
+            allRow.appendChild(selectAll);
+            allRow.appendChild(allLabel);
+            container.appendChild(allRow);
+
+            // Partition line below 'All'
+            const divider = document.createElement('div');
+            divider.style.borderBottom = '1px solid var(--border)';
+            divider.style.margin = '8px 0 8px 0';
+            container.appendChild(divider);
             
             categories.forEach(category => {
-                const checkboxContainer = document.createElement('div');
-                checkboxContainer.classList.add('flex', 'items-center');
+                const option = document.createElement('div');
+                option.className = 'dropdown-option';
             
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
@@ -416,15 +551,19 @@
                 checkbox.checked = true;
             
                 const label = document.createElement('label');
-                label.htmlFor = `category_${category}`;
+                label.htmlFor = checkbox.id;
                 label.textContent = category;
-                label.classList.add('ml-2');
-            
-                checkboxContainer.appendChild(checkbox);
-                checkboxContainer.appendChild(label);
-                container.appendChild(checkboxContainer);
+                label.className = 'ml-2';
+                // Make label clickable to toggle checkbox
+                label.addEventListener('click', function(e) {
+                    checkbox.checked = !checkbox.checked;
+                    checkbox.dispatchEvent(new Event('change'));
+                });
+
+                option.appendChild(checkbox);
+                option.appendChild(label);
+                container.appendChild(option);
             });
-            
             initializeSelectAllCategories();
         }
 
@@ -466,7 +605,7 @@
 
                     const checkedCount = Array.from(categoryCheckboxes).filter(chk => chk.checked).length;
                     if (checkedCount === 0 && !isSelectAllTriggered) {
-                        alert('At least one category must be selected.');
+                        // Instead of popup, always keep at least one checked
                         this.checked = true;
                     }
                 });
@@ -516,15 +655,19 @@
 // Generic renderer to build identical dropdown content for any group
 // groupKey: 'city' | 'college_name' | 'branch'
 function renderGroupOptions(groupKey, items) {
-    const containerId = groupKey === 'college_name' ? 'collegeDropdownMenu'
-                      : groupKey === 'city' ? 'cityDropdown'
-                      : 'branchDropdown';
+    let checkboxesContainer;
+    if (groupKey === 'city') {
+        checkboxesContainer = document.getElementById('cityCheckboxes');
+    } else if (groupKey === 'college_name') {
+        checkboxesContainer = document.getElementById('collegeCheckboxes');
+    } else if (groupKey === 'branch') {
+        checkboxesContainer = document.getElementById('branchCheckboxes');
+    }
+    checkboxesContainer.innerHTML = '';
 
-    const container = document.getElementById(containerId);
-    container.innerHTML = '';
-
+    // Only one 'All' row, with partition line below
     const allRow = document.createElement('div');
-    allRow.className = 'flex items-center';
+    allRow.className = 'dropdown-option';
 
     const selectAll = document.createElement('input');
     selectAll.type = 'checkbox';
@@ -536,14 +679,25 @@ function renderGroupOptions(groupKey, items) {
     allLabel.htmlFor = selectAll.id;
     allLabel.className = 'ml-2';
     allLabel.textContent = 'All';
+    // Make label clickable to toggle checkbox
+    allLabel.addEventListener('click', function(e) {
+        selectAll.checked = !selectAll.checked;
+        selectAll.dispatchEvent(new Event('change'));
+    });
 
     allRow.appendChild(selectAll);
     allRow.appendChild(allLabel);
-    container.appendChild(allRow);
+    checkboxesContainer.appendChild(allRow);
+
+    // Partition line below 'All'
+    const divider = document.createElement('div');
+    divider.style.borderBottom = '1px solid var(--border)';
+    divider.style.margin = '8px 0 8px 0';
+    checkboxesContainer.appendChild(divider);
 
     items.forEach(value => {
         const row = document.createElement('div');
-        row.className = 'flex items-center';
+        row.className = 'dropdown-option';
 
         const cb = document.createElement('input');
         cb.type = 'checkbox';
@@ -555,10 +709,16 @@ function renderGroupOptions(groupKey, items) {
         const label = document.createElement('label');
         label.className = 'ml-2';
         label.textContent = value;
+        label.htmlFor = cb.id = `${groupKey}_${value.replace(/\s+/g, '_')}`;
+        // Make label clickable to toggle checkbox
+        label.addEventListener('click', function(e) {
+            cb.checked = !cb.checked;
+            cb.dispatchEvent(new Event('change'));
+        });
 
         row.appendChild(cb);
         row.appendChild(label);
-        container.appendChild(row);
+        checkboxesContainer.appendChild(row);
     });
 }
 
@@ -731,6 +891,195 @@ document.addEventListener('DOMContentLoaded', function() {
 
             
         });
+        
+        // Convert native select.form-select elements into the same rounded dropdown UI used elsewhere
+        // This preserves the original <select> (kept hidden) so form submission and existing JS continue to work.
+        function convertSelects() {
+            const selects = Array.from(document.querySelectorAll('select.form-select')).filter(s => !s.dataset.converted);
+            selects.forEach(sel => {
+                // mark converted
+                sel.dataset.converted = 'true';
+                // hide original select but keep in DOM for form submit
+                sel.style.position = 'absolute';
+                sel.style.left = '-9999px';
+
+                // build wrapper
+                const wrapper = document.createElement('div');
+                wrapper.className = 'dropdown converted-select-wrapper';
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'dropdown-btn';
+
+                const labelSpan = document.createElement('span');
+                labelSpan.className = 'converted-select-label';
+
+                const icon = document.createElement('i');
+                icon.className = 'bx bx-chevron-down';
+
+                btn.appendChild(labelSpan);
+                btn.appendChild(icon);
+
+                const content = document.createElement('div');
+                content.className = 'dropdown-content';
+
+                function updateBtnLabel() {
+                    const opt = sel.options[sel.selectedIndex];
+                    labelSpan.textContent = opt ? opt.text : '';
+                }
+
+                function rebuildOptions() {
+                    content.innerHTML = '';
+                    Array.from(sel.options).forEach(opt => {
+                        const row = document.createElement('div');
+                        row.className = 'dropdown-option';
+                        row.textContent = opt.text;
+                        row.dataset.value = opt.value;
+                        row.addEventListener('click', function(e) {
+                            sel.value = opt.value;
+                            sel.dispatchEvent(new Event('change', { bubbles: true }));
+                            updateBtnLabel();
+                            content.classList.remove('show');
+                            icon.className = 'bx bx-chevron-down';
+                        });
+                        content.appendChild(row);
+                    });
+                }
+
+                // wire interactions
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    content.classList.toggle('show');
+                    icon.className = content.classList.contains('show') ? 'bx bx-chevron-up' : 'bx bx-chevron-down';
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!wrapper.contains(e.target)) {
+                        if (content.classList.contains('show')) {
+                            content.classList.remove('show');
+                            icon.className = 'bx bx-chevron-down';
+                        }
+                    }
+                });
+
+                // place wrapper into DOM and attach original select inside it (keeps form structure)
+                sel.parentNode.insertBefore(wrapper, sel);
+                wrapper.appendChild(btn);
+                wrapper.appendChild(content);
+                wrapper.appendChild(sel);
+
+                // observe option list changes so dynamic updates (like caste) update the UI
+                const mo = new MutationObserver(function() {
+                    rebuildOptions();
+                    updateBtnLabel();
+                });
+                mo.observe(sel, { childList: true, subtree: true });
+
+                // reflect selection changes
+                sel.addEventListener('change', updateBtnLabel);
+
+                // initial build
+                rebuildOptions();
+                updateBtnLabel();
+            });
+        }
+
+        // run conversion after initial page setup
+        convertSelects();
+
+        // Persist and restore filters using localStorage so "Back to Search" and "Search Again" keep selections
+        const FORM_KEY = 'pf_filters_v1';
+        function saveFilters() {
+            const form = document.querySelector('.form-container');
+            const data = {};
+            new FormData(form).forEach((v, k) => {
+                if (data[k]) {
+                    if (Array.isArray(data[k])) data[k].push(v); else data[k] = [data[k], v];
+                } else data[k] = v;
+            });
+            localStorage.setItem(FORM_KEY, JSON.stringify(data));
+        }
+
+        function restoreFilters() {
+            const raw = localStorage.getItem(FORM_KEY);
+            if (!raw) return;
+            const data = JSON.parse(raw);
+            const form = document.querySelector('.form-container');
+            Object.keys(data).forEach(k => {
+                const val = data[k];
+                const els = form.querySelectorAll(`[name="${k}"]`);
+                if (!els || els.length === 0) return;
+                if (els[0].type === 'checkbox') {
+                    // could be array
+                    const arr = Array.isArray(val) ? val : [val];
+                    els.forEach(el => {
+                        el.checked = arr.indexOf(el.value) !== -1;
+                        el.dispatchEvent(new Event('change'));
+                    });
+                } else if (els[0].tagName === 'SELECT' || els[0].type === 'text' || els[0].type === 'number') {
+                    els[0].value = Array.isArray(val) ? val[0] : val;
+                    els[0].dispatchEvent(new Event('change'));
+                }
+            });
+        }
+
+        // save on any change
+        document.querySelectorAll('.form-container input, .form-container select').forEach(el => {
+            el.addEventListener('change', saveFilters);
+        });
+
+        // restore at load (if present)
+        restoreFilters();
+
+        // Advanced filters toggle - simple direct handler
+        (function() {
+            const advBtn = document.getElementById('show-advanced-btn');
+            const advWrap = document.getElementById('advanced-filters');
+            const advToggleContainer = document.getElementById('advanced-filters-toggle');
+            function setToggleState(open) {
+                if (!advWrap || !advBtn) return;
+                if (open) {
+                    advWrap.classList.add('show');
+                    advWrap.style.display = 'block';
+                    advBtn.textContent = 'Hide Advanced Filters';
+                    if (advToggleContainer) advToggleContainer.classList.add('show');
+                    advWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    advWrap.classList.remove('show');
+                    advWrap.style.display = 'none';
+                    advBtn.textContent = 'Show Advanced Filters';
+                    if (advToggleContainer) advToggleContainer.classList.remove('show');
+                }
+            }
+
+            function toggleAdvanced() {
+                const isOpen = advWrap && (advWrap.classList.contains('show') || advWrap.style.display === 'block');
+                setToggleState(!isOpen);
+            }
+
+            if (advBtn) advBtn.addEventListener('click', function(e) { e.preventDefault(); toggleAdvanced(); });
+
+            // Auto-open if saved advanced filters are present
+            try {
+                const raw = localStorage.getItem(FORM_KEY);
+                if (raw) {
+                    const data = JSON.parse(raw);
+                    const advancedKeys = ['institute_type', 'city', 'college_name', 'branch'];
+                    outer: for (const k of Object.keys(data)) {
+                        for (const a of advancedKeys) {
+                            if (k.indexOf(a) !== -1) {
+                                // ensure panel is visible
+                                setToggleState(true);
+                                break outer;
+                            }
+                        }
+                    }
+                }
+            } catch (_) { /* ignore */ }
+        })();
+
+        // ensure any time options are replaced programmatically we keep UI in sync
+        // e.g., handleDomicileChange and other code replace options — MutationObserver above will handle it
     </script>
 </body>
 </html>

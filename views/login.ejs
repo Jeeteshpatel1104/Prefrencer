@@ -1,155 +1,27 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - College Predictor</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
-        
-        body {
-            background-color: #f5f7fa;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        
-        .login-container {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            width: 400px;
-            padding: 40px;
-            text-align: center;
-        }
-        
-        .logo {
-            margin-bottom: 30px;
-        }
-        
-        .logo img {
-            height: 50px;
-        }
-        
-        h1 {
-            color: #333;
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-        
-        p {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-        
-        .google-btn {
-            background-color: #4285F4;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 12px 20px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            margin-bottom: 20px;
-            transition: background-color 0.3s;
-        }
-        
-        .google-btn:hover {
-            background-color: #3367D6;
-        }
-        
-        .google-btn img {
-            width: 20px;
-            margin-right: 10px;
-        }
-        
-        .divider {
-            display: flex;
-            align-items: center;
-            margin: 20px 0;
-        }
-        
-        .divider::before, .divider::after {
-            content: "";
-            flex: 1;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        
-        .divider span {
-            padding: 0 10px;
-            color: #666;
-            font-size: 12px;
-        }
-        
-        .footer {
-            margin-top: 30px;
-            font-size: 12px;
-            color: #999;
-        }
-    </style>
-</head>
-<body>
-    <div class="login-container">
-        <div class="logo">
-            <img src="https://via.placeholder.com/150x50?text=College+Predictor" alt="College Predictor">
-        </div>
-        <h1>Welcome Back</h1>
-        <p>Login to access your personalized college predictions</p>
-        
-        <a href="/auth/google" class="google-btn">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google logo">
-            Continue with Google
-        </a>
-        
-        <div class="divider">
-            <span>OR</span>
-        </div>
-        
-        <form action="/login" method="POST">
-            <div class="form-group">
-                <input type="email" name="email" placeholder="Email address" required>
-            </div>
-            <div class="form-group">
-                <input type="password" name="password" placeholder="Password" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Login</button>
-        </form>
-        
-        <div class="footer">
-            By continuing, you agree to our Terms of Service and Privacy Policy
-        </div>
-    </div>
-</body>
-</html>
-
-    /* linear-gradient(135deg, #e6e7ec 0%, #c5c6d0 100%); 
-         linear-gradient(135deg, #e0f7fa 0%, #cfd8dc 100%)
-         linear-gradient(135deg, #4f46e5 0%, #312e81 100%)*/
-         
-
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - College Predictor</title>
+    <title>Login - MPDTE College Preference Finder 2025</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
     <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #06d6a0;
+            --accent: #ff6b6b;
+            --light: #f8f9fa;
+            --dark: #1e293b;
+            --text: #334155;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -158,30 +30,76 @@
         }
 
         body {
-            background-color: #f8fafc;
+            background: linear-gradient(135deg, #f0f4f8 0%, #e6e9f0 100%);
             display: flex;
+            justify-content: center;
+            align-items: center;
             min-height: 100vh;
-            color: #1e293b;
+            color: var(--text);
+            padding: 20px;
         }
 
-        .split-container {
+        .container {
             display: flex;
+            max-width: 1200px;
             width: 100%;
+            min-height: 90vh;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            background: white;
+            position: relative;
         }
-        /* linear-gradient(135deg, #e6e7ec 0%, #c5c6d0 100%); 
-         linear-gradient(135deg, #e0f7fa 0%, #cfd8dc 100%)
-         linear-gradient(135deg, #4f46e5 0%, #312e81 100%)*/
-         
+
+        /* Decorative elements */
+        .decoration {
+            position: absolute;
+            z-index: 0;
+        }
+
+        .decoration-1 {
+            top: -60px;
+            right: -60px;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, #5e72e4 100%);
+            opacity: 0.1;
+        }
+
+        .decoration-2 {
+            bottom: -80px;
+            left: -80px;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--secondary) 0%, #06b6d4 100%);
+            opacity: 0.08;
+        }
+
+        .decoration-3 {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent) 0%, #ff9e9e 100%);
+            opacity: 0.05;
+        }
+
+        /* Content Section */
         .content-section {
             flex: 1;
-            background:linear-gradient(135deg, #e0dfe7 0%, #9f9dad 100%);
-            color: #000000;
-            padding: 60px;
+            background: linear-gradient(135deg, var(--primary) 0%, #5e72e4 100%);
+            color: white;
+            padding: 60px 50px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             position: relative;
             overflow: hidden;
+            z-index: 1;
         }
 
         .content-section::before {
@@ -196,155 +114,215 @@
             pointer-events: none;
         }
 
-        .login-section {
-            width: 450px;
-            background: #ffffff;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 60px 50px;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .logo {
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .logo img {
-            height: 80px;
-            width: auto;
+        .tag {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 13px;
+            margin-bottom: 30px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(5px);
         }
 
         h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
+            font-size: 2.8rem;
+            margin-bottom: 1.2rem;
             font-weight: 700;
             line-height: 1.2;
+            position: relative;
+            z-index: 2;
         }
 
         h2 {
-            font-size: 1.25rem;
-            margin-bottom: 2rem;
+            font-size: 1.3rem;
+            margin-bottom: 2.5rem;
             font-weight: 400;
             opacity: 0.9;
-            color: #434446;
+            max-width: 90%;
+            position: relative;
+            z-index: 2;
         }
 
         .feature-list {
             margin: 40px 0;
+            position: relative;
+            z-index: 2;
         }
 
         .feature-item {
             display: flex;
-            align-items: center;
-            margin-bottom: 20px;
+            align-items: flex-start;
+            margin-bottom: 25px;
+            transition: var(--transition);
+            padding: 10px 15px;
+            border-radius: 12px;
+        }
+
+        .feature-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
         }
 
         .feature-icon {
-            background: rgba(255, 255, 255, 0.418);
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 15px;
+            margin-right: 18px;
             flex-shrink: 0;
-            color: rgb(54, 51, 51);
-            font-size: 16px;
-            
+            font-size: 18px;
+            backdrop-filter: blur(5px);
         }
 
         .feature-text {
-            font-size: 1rem;
-            line-height: 1.5;
-            color: #000000;
-            font-weight: bold;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            font-weight: 500;
         }
 
         .testimonial {
-            background: rgba(255, 255, 255, 0.418);
-            padding: 20px;
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 25px;
+            border-radius: 16px;
             margin-top: 30px;
-            font-style: italic;
             position: relative;
-            color:#000000;
+            z-index: 2;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: var(--transition);
+        }
+
+        .testimonial:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
 
         .testimonial::before {
             content: '"';
-            font-size: 60px;
+            font-size: 70px;
             position: absolute;
-            top: -20px;
+            top: -30px;
             left: 10px;
-            color: rgba(255, 255, 255, 0.418);
+            color: rgba(255, 255, 255, 0.2);
             font-family: serif;
             line-height: 1;
         }
 
-        .testimonial-author {
-            margin-top: 10px;
-            font-weight: 500;
-            color: rgb(0, 0, 0);
-            font-style: normal;
+        .testimonial p {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            font-weight: 400;
         }
 
-        .login-container {
-            width: 100%;
+        .testimonial-author {
+            font-weight: 600;
+            font-style: normal;
+            display: flex;
+            align-items: center;
+        }
+
+        .testimonial-author i {
+            margin-right: 8px;
+            color: var(--secondary);
+        }
+
+        /* Login Section */
+        .login-section {
+            width: 45%;
+            min-width: 450px;
+            background: var(--light);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 60px 50px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .logo {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .logo-img {
+            height: 80px;
+            width: auto;
+            margin-bottom: 15px;
+        }
+
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.5px;
         }
 
         .login-title {
-            color: #1e293b;
-            font-size: 1.8rem;
+            color: var(--dark);
+            font-size: 2.2rem;
             margin-bottom: 10px;
             text-align: center;
-            font-weight: 600;
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
         .login-subtitle {
-            color: #64748b;
-            margin-bottom: 30px;
-            font-size: 0.95rem;
+            color: var(--text-light);
+            margin-bottom: 35px;
+            font-size: 1rem;
             text-align: center;
-            line-height: 1.5;
+            line-height: 1.6;
+            max-width: 90%;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .google-btn {
-            background-color: #ffffff;
-            color: #1e293b;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 12px 20px;
-            font-size: 15px;
+            background-color: white;
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 20px;
+            font-size: 16px;
             font-weight: 500;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
-            margin-bottom: 20px;
-            transition: all 0.3s;
+            margin-bottom: 25px;
+            transition: var(--transition);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
         .google-btn:hover {
             background-color: #f8fafc;
             border-color: #cbd5e1;
-            transform: translateY(-1px);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .google-btn:active {
+            transform: translateY(0);
         }
 
         .google-icon {
-            width: 18px;
-            height: 18px;
-            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
         }
 
         .divider {
             display: flex;
             align-items: center;
-            margin: 25px 0;
-            color: #cbd5e1;
+            margin: 30px 0;
+            color: var(--border);
             position: relative;
         }
 
@@ -352,114 +330,201 @@
         .divider::after {
             content: "";
             flex: 1;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid var(--border);
         }
 
         .divider span {
-            padding: 0 12px;
-            color: #64748b;
-            font-size: 13px;
-            background: white;
+            padding: 0 15px;
+            color: var(--text-light);
+            font-size: 14px;
+            background: var(--light);
             position: relative;
             z-index: 1;
+            font-weight: 500;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            position: relative;
         }
 
         .form-group input {
             width: 100%;
-            padding: 14px 16px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 15px;
-            transition: all 0.3s;
-            background-color: #f8fafc;
+            padding: 16px 20px 16px 48px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 16px;
+            transition: var(--transition);
+            background-color: white;
+            color: var(--text);
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-            background-color: white;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.15);
+        }
+
+        .form-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            font-size: 18px;
         }
 
         .login-btn {
-            background-color: #4f46e5;
+            background: linear-gradient(to right, var(--primary), var(--primary-dark));
             color: white;
             border: none;
-            border-radius: 8px;
-            padding: 14px 20px;
-            font-size: 16px;
-            font-weight: 500;
+            border-radius: 12px;
+            padding: 16px 20px;
+            font-size: 17px;
+            font-weight: 600;
             cursor: pointer;
             width: 100%;
-            transition: all 0.3s;
+            transition: var(--transition);
             margin-top: 10px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
         }
 
         .login-btn:hover {
-            background-color: #4338ca;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+            background: linear-gradient(to right, var(--primary-dark), #2f44c0);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
         }
 
         .footer {
-            margin-top: 30px;
-            font-size: 12px;
-            color: #94a3b8;
+            margin-top: 35px;
+            font-size: 14px;
+            color: var(--text-light);
             text-align: center;
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
         .footer a {
-            color: #4f46e5;
+            color: var(--primary);
             text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .footer a:hover {
+            color: var(--primary-dark);
+        }
+
+        .footer a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: var(--transition);
+        }
+
+        .footer a:hover::after {
+            width: 100%;
+        }
+
+        .signup-link {
+            display: block;
+            margin-top: 15px;
             font-weight: 500;
         }
 
-        .tag {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.418);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            margin-bottom: 20px;
-            color: rgb(0, 0, 0);
+        /* Animations */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
         }
 
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Responsive Design */
         @media (max-width: 1024px) {
-            .login-section {
-                width: 400px;
+            .container {
+                max-width: 900px;
+            }
+            
+            .content-section, .login-section {
                 padding: 50px 40px;
             }
             
-            .content-section {
-                padding: 50px 40px;
+            h1 {
+                font-size: 2.5rem;
             }
         }
 
         @media (max-width: 768px) {
-            .split-container {
+            .container {
                 flex-direction: column;
+                max-width: 600px;
+                min-height: auto;
             }
-
+            
             .content-section {
-                padding: 40px 30px;
-                order: 2;
+                padding: 50px 30px;
+                border-radius: 20px 20px 0 0;
             }
-
+            
             .login-section {
                 width: 100%;
+                min-width: auto;
                 padding: 50px 30px;
-                order: 1;
+                border-radius: 0 0 20px 20px;
+            }
+            
+            .decoration {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                border-radius: 16px;
+            }
+            
+            .content-section, .login-section {
+                padding: 40px 25px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .login-title {
+                font-size: 1.8rem;
+            }
+            
+            .logo-img {
+                height: 70px;
+            }
+            
+            .feature-text {
+                font-size: 1rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="split-container">
+    <div class="container">
+        <!-- Decorative Elements -->
+        <div class="decoration decoration-1"></div>
+        <div class="decoration decoration-2"></div>
+        <div class="decoration decoration-3"></div>
+        
         <!-- Left Content Section -->
         <div class="content-section">
             <div class="tag">100% FREE • TRUSTED BY 10,000+ STUDENTS • Made by IITians</div>
@@ -468,61 +533,110 @@
             
             <div class="feature-list">
                 <div class="feature-item">
-                    <div class="feature-icon"><i class="fas fa-check"></i></div>
+                    <div class="feature-icon"><i class="fas fa-filter"></i></div>
                     <div class="feature-text">13 Smart Filters: Sort by trends, closing/opening ranks, location, branch preference, and more.</div>
                 </div>
                 <div class="feature-item">
-                    <div class="feature-icon"><i class="fas fa-check"></i></div>
+                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
                     <div class="feature-text">Historical Cutoffs: 2022-2024 admission trends for accurate predictions.</div>
                 </div>
                 <div class="feature-item">
-                    <div class="feature-icon"><i class="fas fa-check"></i></div>
+                    <div class="feature-icon"><i class="fas fa-database"></i></div>
                     <div class="feature-text">Official Data: Verified MPDTE counseling statistics and seat matrices.</div>
                 </div>
             </div>
             
-            <div class="testimonial">
-                Our College Preference Finder 2025 helps you predict admission chances in Top Government, Private, and Self-Financed Engineering colleges across Madhya Pradesh based on your JEE Mains 2025 rank.
-                <div class="testimonial-author">- Founders</div>
+            <div class="testimonial floating">
+                <p>Our College Preference Finder 2025 helps you predict admission chances in Top Government, Private, and Self-Financed Engineering colleges across Madhya Pradesh based on your JEE Mains 2025 rank.</p>
+                <div class="testimonial-author"><i class="fas fa-graduation-cap"></i> - Founders, IIT Alumni</div>
             </div>
         </div>
         
         <!-- Right Login Section -->
         <div class="login-section">
-            <div class="login-container">
-                <div class="logo">
-                    <img src="/images/MargDarshak.png" alt="MargDarshak logo">
+            <div class="logo">
+                <div class="logo-img">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="48" fill="#4361ee" opacity="0.1"/>
+                        <path d="M50 20 L70 40 L65 70 L35 70 L30 40 Z" fill="#4361ee"/>
+                        <circle cx="50" cy="35" r="8" fill="#06d6a0"/>
+                        <circle cx="50" cy="55" r="5" fill="white"/>
+                    </svg>
                 </div>
-                <h1 class="login-title">Welcome Back</h1>
-                <p class="login-subtitle">Sign in to access your personalized dashboard and college recommendations</p>
-                
-                <a href="/auth/google" class="google-btn">
-                    <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg" 
-                         alt="Google logo" 
-                         class="google-icon">
-                    Continue with Google
-                </a>
-                
-                <div class="divider">
-                    <span>OR</span>
+                <div class="logo-text">MargDarshak</div>
+            </div>
+            <h1 class="login-title">Welcome Back</h1>
+            <p class="login-subtitle">Sign in to access your personalized dashboard and college recommendations</p>
+            
+            <a href="/auth/google" class="google-btn">
+                <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg" 
+                     alt="Google logo" 
+                     class="google-icon">
+                Continue with Google
+            </a>
+            
+            <div class="divider">
+                <span>OR</span>
+            </div>
+            
+            <form action="/login" method="POST">
+                <div class="form-group">
+                    <i class="bx bx-envelope form-icon"></i>
+                    <input type="email" name="email" placeholder="Email address" required>
                 </div>
-                
-                <form action="/login" method="POST">
-                    <div class="form-group">
-                        <input type="email" name="email" placeholder="Email address" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="password" name="password" placeholder="Password" required>
-                    </div>
-                    <button type="submit" class="login-btn">Sign In</button>
-                </form>
-                
-                <div class="footer">
-                    By continuing, you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.
-                    <div style="margin-top: 8px;">Don't have an account? <a href="#" style="font-weight: 600;">Sign up</a></div>
+                <div class="form-group">
+                    <i class="bx bx-lock form-icon"></i>
+                    <input type="password" name="password" placeholder="Password" required>
                 </div>
+                <button type="submit" class="login-btn">Sign In</button>
+            </form>
+            
+            <div class="footer">
+                By continuing, you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.
+                <div class="signup-link">Don't have an account? <a href="#" style="font-weight: 600;">Sign up now</a></div>
             </div>
         </div>
     </div>
+
+    <script>
+        // Add subtle animations on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate feature items
+            const features = document.querySelectorAll('.feature-item');
+            features.forEach((feature, index) => {
+                feature.style.opacity = "0";
+                feature.style.transform = "translateX(-20px)";
+                feature.style.transition = "opacity 0.5s ease, transform 0.5s ease";
+                
+                setTimeout(() => {
+                    feature.style.opacity = "1";
+                    feature.style.transform = "translateX(0)";
+                }, 300 + (index * 150));
+            });
+            
+            // Animate login form
+            const loginForm = document.querySelector('.login-section');
+            loginForm.style.opacity = "0";
+            loginForm.style.transform = "translateY(20px)";
+            loginForm.style.transition = "opacity 0.6s ease, transform 0.6s ease";
+            
+            setTimeout(() => {
+                loginForm.style.opacity = "1";
+                loginForm.style.transform = "translateY(0)";
+            }, 500);
+            
+            // Add hover effects to buttons
+            const buttons = document.querySelectorAll('.google-btn, .login-btn');
+            buttons.forEach(button => {
+                button.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-3px)';
+                });
+                
+                button.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    </script>
 </body>
 </html>

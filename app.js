@@ -42,7 +42,7 @@ pool.connect()
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL:'https://prefrencer.onrender.com/auth/google/callback' 
+    callbackURL:'http://localhost:3000/auth/google/callback' 
     // callbackURL:'https://prefrencer.onrender.com/auth/google/callback' 
         	// http://localhost:3000/auth/google/callback
 }, async (accessToken, refreshToken, profile, done) => {
@@ -383,7 +383,11 @@ if (!Array.isArray(categories)) {
             return 0;
         });
 
-        res.render('results', { results: finalResults });
+        res.render('results', { 
+            results: finalResults,
+            user: req.user || null,
+            search: { rank, selectedCaste, domicile, rankRange, sortBy }
+        });
     } catch (err) {
         console.error('Search error:', err);
         res.status(500).send('Internal Server Error');
