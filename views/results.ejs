@@ -660,6 +660,20 @@
       .hero { margin-bottom: 10px; }
       .results-container { margin-top: 0; padding-top: 12px; }
     }
+
+    /* Fixes specific very narrow devices (eg. 360px wide phones) where gutters get clipped */
+    @media (max-width: 360px) {
+      /* Reduce outer container padding so the white summary cards have equal left/right gutters */
+      .container { padding-left: 8px; padding-right: 8px; }
+      .result-summary { padding-left: 8px; padding-right: 8px; gap:8px; }
+      .summary-card { padding: 8px 10px; }
+      /* Ensure results container also respects small horizontal gutters */
+      .results-container { padding-left: 8px; padding-right: 8px; }
+
+      /* Tighten pagination so the first and last buttons are fully visible */
+      #pagination-tabs, #pagination-tabs-bottom { padding: 0 2px; gap:2px; }
+      #pagination-tabs button, #pagination-tabs-bottom button { margin:0 1px; padding:2px 4px; min-width:24px; font-size:11px; }
+    }
   </style>
 </head>
 <body>
