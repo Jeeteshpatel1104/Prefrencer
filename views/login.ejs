@@ -489,6 +489,9 @@
             .decoration {
                 display: none;
             }
+            /* On mobile, show the login-section first and the content-section below using order */
+            .login-section { order: -1; }
+            .content-section { order: 0; }
         }
 
         @media (max-width: 480px) {

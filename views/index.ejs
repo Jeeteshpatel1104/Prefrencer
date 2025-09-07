@@ -90,8 +90,9 @@
         .hero-title { font-size: 2.8rem; font-weight: 700; color: var(--dark); margin-bottom: 10px; letter-spacing: -0.5px; }
         .hero-tag { display: inline-flex; align-items: center; gap: 8px; background: rgba(6, 214, 160, 0.15); color: #06a17e; padding: 8px 20px; border-radius: 50px; font-weight: 500; margin-top: 10px; }
         .form-container { background: white; border-radius: 20px; box-shadow: var(--shadow); padding: 40px; margin-bottom: 40px; position: relative; z-index: 2; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-bottom: 25px; }
-        .form-group { margin-bottom: 0; }
+    /* Use a smaller minimum so the grid auto-fits narrow phones without horizontal overflow */
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 18px; margin-bottom: 18px; }
+    .form-group { margin-bottom: 0; min-width: 0; }
         .form-label { display: block; font-size: 15px; font-weight: 500; color: var(--dark); margin-bottom: 10px; }
         /* Inputs and selects share the same rounded, elevated appearance used by the custom dropdowns */
         .form-input, .form-select {
@@ -109,6 +110,10 @@
             appearance: none;
             display: inline-block;
             line-height: 1.2;
+            /* prevent children from forcing the grid to overflow */
+            min-width: 0;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         .form-input:focus, .form-select:focus {
@@ -210,6 +215,34 @@
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+        /* Mobile overrides: keep desktop styles above unchanged */
+        @media (max-width: 768px) {
+            header { padding: 12px 16px; border-radius: 10px; }
+            /* hide big decorations on mobile to reduce clutter */
+            .decoration-1, .decoration-2 { display: none !important; }
+            .header-content { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .form-container { padding: 18px; }
+            .advanced-box { padding: 12px; }
+            .filters-grid { display: block; }
+            #advanced-filters { padding: 12px; }
+            /* Transform large multi-column dropdowns into scrollable blocks */
+            .dropdown-options { max-height: 220px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 10px; }
+            .header-logo { height: 34px; }
+            .hero-title { font-size: 1.6rem; }
+            .form-container { padding: 12px; }
+            #show-advanced-btn { font-size: 14px; }
+            .advanced-box { padding: 10px; }
+            .dropdown-option { padding: 6px 0; }
+            /* Keep logo + welcome + logout on a single line on small screens */
+            .header-content { flex-direction: row; align-items: center; justify-content: space-between; }
+            .user-info { display: flex; align-items: center; gap: 8px; }
+            .user-name { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45vw; }
+            .logout-btn { padding: 6px 10px; font-size: 13px; }
+        }
 </style>
 </head>
 <body>
@@ -314,6 +347,8 @@
                     <label class="form-label" for="rank_range">Rank Range:</label>
                     <select name="rank_range" id="rank_range" class="form-select">
                         <option value="10000000">Start To End</option>
+                        <option value="1000000">±10 lakh</option>
+                        <option value="500000">±5 lakh</option>
                         <option value="200000">±2 lakh</option>
                         <option value="100000">±1 lakh</option>
                         <option value="50000">±50k</option>

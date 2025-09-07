@@ -271,6 +271,44 @@
       font-weight: 500;
       padding: 16px 20px;
       text-align: left;
+    /* Additional header + mobile table card layout for small devices */
+    @media (max-width: 768px) {
+      /* Keep logo + username + logout on a single line */
+      .header-content { flex-direction: row; align-items: center; justify-content: space-between; }
+      .header-logo { height: 34px; }
+      .user-info { display: flex; align-items: center; gap: 8px; }
+      .user-name { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50vw; }
+      .logout-btn { padding: 6px 10px; font-size: 13px; }
+
+  /* Convert table rows into 3-line cards for mobile readability */
+  .results-table, .results-table thead, .results-table tbody, .results-table th, .results-table td, .results-table tr { display: block; width: 100%; }
+  .results-table thead { display: none; }
+  .results-table tbody { padding: 0; }
+  .results-table tbody tr { margin-bottom: 12px; background: white; border-radius: 12px; box-shadow: var(--shadow); padding: 10px 12px; border: 1px solid var(--border); display: grid; grid-template-rows: auto auto auto; gap: 8px; grid-template-columns: 1fr; }
+
+  /* Line 1: S.No + College name */
+  .results-table tbody tr .line-1 { display: flex; gap: 8px; align-items: center; }
+  .results-table tbody tr .line-1 .sno { flex: 0 0 36px; color: var(--text-light); font-weight: 600; }
+  .results-table tbody tr .line-1 .college { flex: 1 1 auto; font-weight: 700; color: var(--dark); word-break: break-word; }
+
+  /* Line 2: Institute type + Branch + Category */
+  .results-table tbody tr .line-2 { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .results-table tbody tr .line-2 .institute { flex: 0 0 auto; }
+  .results-table tbody tr .line-2 .branch { flex: 1 1 auto; color: var(--text); }
+  .results-table tbody tr .line-2 .category { flex: 0 0 auto; color: var(--text-light); }
+
+  /* Line 3: Round + Opening + Closing */
+  .results-table tbody tr .line-3 { display: flex; gap: 12px; align-items: center; justify-content: flex-start; flex-wrap: wrap; }
+  .results-table tbody tr .line-3 .round, .results-table tbody tr .line-3 .opening, .results-table tbody tr .line-3 .closing { font-size: 13px; color: var(--text); }
+
+  /* Show the mobile-card column and hide large-table cells on mobile */
+  .results-table tbody tr td:not(.mobile-card) { display: none; }
+  .results-table tbody tr td.mobile-card { display: block; }
+
+  /* Tweak badges and rank containers for small screens */
+  .institute-badge { font-size: 12px; padding: 5px 8px; }
+  .rank-container { padding: 6px 8px; font-size: 13px; }
+    }
       position: sticky;
       top: 0;
       z-index: 10;
@@ -553,6 +591,75 @@
         font-size: 14px;
       }
     }
+    /* Additional mobile overrides to improve fit while preserving desktop styles */
+    @media (max-width: 768px) {
+      header { padding: 12px 16px; border-radius: 10px; }
+      .header-content { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .user-info { margin-top: 6px; }
+      .container { padding: 0 12px; }
+      .back-link { padding: 8px 10px; font-size: 14px; }
+      .hero { padding: 12px 0; }
+      .results-container { padding: 12px; }
+      /* Make the table horizontally scrollable and improve touch scrolling */
+      .results-table { display: block; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .results-table thead, .results-table tbody, .results-table tr, .results-table th, .results-table td { display: table-row-group; }
+      .results-table td { white-space: normal; word-break: break-word; }
+      .rank-tooltip { max-width: 85vw; }
+      #pagination-tabs, #pagination-tabs-bottom { justify-content: center; flex-wrap: wrap; }
+      .actions { display: flex; flex-direction: column; gap: 8px; }
+      .btn { width: 100%; }
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 12px; }
+      .header-logo { height: 34px; }
+      .user-name { font-size: 14px; }
+      .results-table { font-size: 13px; }
+      .results-table tbody tr { padding: 8px 6px; }
+      .back-link { font-size: 13px; padding: 6px 8px; }
+      .rank-tooltip { font-size: 13px; line-height: 1.2; min-width: 160px; }
+    }
+    /* Mobile card override: present results as stacked cards and keep header in one line */
+    @media (max-width: 600px) {
+      .results-table { display: none !important; }
+      #results-cards { display: block !important; }
+      .result-card { background: #fff; border-radius: 10px; padding: 12px; box-shadow: 0 6px 18px rgba(16,24,40,0.06); margin-bottom: 12px; border: 1px solid var(--border); }
+      /* Line 1: S.No + College name (name starts just after serial) */
+      .result-card .line1 { display:flex; gap:8px; align-items:center; font-weight:600; color:var(--dark); }
+      .result-card .line1 .sno { flex:0 0 auto; color:var(--text-light); }
+      .result-card .line1 .name { flex:1 1 auto; font-weight:700; font-size:15px; word-break:break-word; white-space:normal; }
+      /* Line 2: Institute type + Branch + Category (badges use same classes as desktop) */
+      .result-card .line2 { display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; color:var(--text); font-size:13px; align-items:center; }
+      .result-card .line2 .institute-badge { font-size:12px; padding:4px 8px; }
+      /* Line 3: Round + Opening + Closing. Opening/Closing are rank-containers so tooltips show previous years; font-size reduced */
+      .result-card .line3 { display:flex; gap:12px; margin-top:8px; color:var(--text-light); font-size:12px; justify-content:space-between; align-items:center; }
+      .result-card .rank-container { padding:6px 8px; background:var(--light); border-radius:8px; }
+
+  /* Pagination: compress buttons to fit on a single line without a scrollbar */
+  #pagination-tabs, #pagination-tabs-bottom { white-space: nowrap; overflow-x: hidden; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; gap:2px; display:flex; justify-content:center; padding:0 4px; }
+  #pagination-tabs button, #pagination-tabs-bottom button { display: inline-block; margin:0 2px; padding:3px 5px; min-width:26px; font-size:12px; line-height:1; border-radius:6px; }
+  /* reduce active button padding slightly */
+  #pagination-tabs button[style], #pagination-tabs-bottom button[style] { padding:4px 6px; }
+
+  /* Summary: show as 2 columns (2x2) on mobile and reduce visual weight */
+  .result-summary { display: grid; grid-template-columns: 1fr 1fr; gap:10px; padding: 10px; }
+  .summary-card { padding: 10px 12px; border-radius: 10px; }
+  .summary-value { font-size: 1.2rem; }
+  .summary-label { font-size: 0.85rem; }
+
+      /* Force header elements into single row */
+      .header-content { flex-direction: row !important; align-items: center !important; justify-content: space-between !important; }
+      .user-name { max-width: 45vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .user-info { gap:8px; }
+
+      /* hide big decorations and back link on mobile to reduce clutter and save vertical space */
+      .decoration-1, .decoration-2, .back-nav { display: none !important; }
+
+      /* Reduce hero subtitle size and bring results up for better first-screen view */
+      .hero-subtitle { font-size: 12px !important; }
+      .hero { margin-bottom: 10px; }
+      .results-container { margin-top: 0; padding-top: 12px; }
+    }
   </style>
 </head>
 <body>
@@ -659,6 +766,7 @@
           <!-- Rendered by client-side pagination script -->
         </tbody>
       </table>
+  <div id="results-cards" style="display:none; margin-top:12px;"></div>
   <div id="pagination-tabs-bottom" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:center;"></div>
     </div>
 
@@ -726,6 +834,35 @@
         `;
       }
 
+      function renderCard(r, displayIndex) {
+        const opening = r.opening_rank_2024 || r.opening_rank || 'N/A';
+        const closing = r.closing_rank_2024 || r.closing_rank || 'N/A';
+        // S.No and name on the same line; name begins immediately after serial
+        return `
+          <div class="result-card">
+            <div class="line1"><span class="sno">${displayIndex}.</span><span class="name">${escapeHtml(r.college_name)}</span></div>
+            <div class="line2">${createBadge(r.institute_type)} <span>${escapeHtml(r.branch || '')}</span> <span>${escapeHtml(r.allotted_category || 'N/A')}</span></div>
+            <div class="line3">
+              <div class="rank-container">Round: ${escapeHtml(r.round || 'N/A')}</div>
+              <div class="rank-container opening">${escapeHtml(String(opening))}
+                <div class="rank-tooltip" style="display:none;">
+                  <div class="rank-year"><span class="year-label">2024:</span><span>${escapeHtml(String(r.opening_rank_2024 || 'N/A'))}</span></div>
+                  <div class="rank-year"><span class="year-label">2023:</span><span>${escapeHtml(String(r.opening_rank_2023 || 'N/A'))}</span></div>
+                  <div class="rank-year"><span class="year-label">2022:</span><span>${escapeHtml(String(r.opening_rank_2022 || 'N/A'))}</span></div>
+                </div>
+              </div>
+              <div class="rank-container closing">${escapeHtml(String(closing))}
+                <div class="rank-tooltip" style="display:none;">
+                  <div class="rank-year"><span class="year-label">2024:</span><span>${escapeHtml(String(r.closing_rank_2024 || 'N/A'))}</span></div>
+                  <div class="rank-year"><span class="year-label">2023:</span><span>${escapeHtml(String(r.closing_rank_2023 || 'N/A'))}</span></div>
+                  <div class="rank-year"><span class="year-label">2022:</span><span>${escapeHtml(String(r.closing_rank_2022 || 'N/A'))}</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
       function escapeHtml(str) {
         if (str === null || typeof str === 'undefined') return '';
         return String(str).replace(/[&<>"']/g, function (s) {
@@ -780,8 +917,13 @@
         if (top < 8) top = 8;
         if (top + ttRect.height > viewportHeight - 8) top = Math.max(8, viewportHeight - ttRect.height - 8);
 
-        // horizontal: align to left of rc but keep on-screen
+        // horizontal: prefer aligning to left of rc but if tooltip would be cut on right, shift left
         let left = rcRect.left;
+        if (left + ttRect.width > viewportWidth - 8) {
+          // try aligning to the right edge of rc minus tooltip width
+          left = rcRect.right - ttRect.width;
+        }
+        // add a small left offset so tooltip doesn't touch screen edge
         if (left + ttRect.width > viewportWidth - 8) left = Math.max(8, viewportWidth - ttRect.width - 8);
         if (left < 8) left = 8;
 
@@ -813,8 +955,10 @@
         const pageItems = RAW_RESULTS.slice(start, start + PER_PAGE);
         if (pageItems.length === 0) {
           tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon"><i class="bx bx-search-alt"></i></div><div class="empty-title">No colleges matched your search</div><div class="empty-text">Try widening your rank range.</div></div></td></tr>';
+          document.getElementById('results-cards').innerHTML = '';
         } else {
           tbody.innerHTML = pageItems.map((r, i) => renderRow(r, start + i + 1)).join('');
+          document.getElementById('results-cards').innerHTML = pageItems.map((r, i) => renderCard(r, start + i + 1)).join('');
         }
         resultsCountEl.textContent = `Showing ${RAW_RESULTS.length} entries`;
         buildPagination();
@@ -828,7 +972,7 @@
           const wrapper = document.createElement('div');
           wrapper.style.display = 'flex';
           wrapper.style.gap = '8px';
-          wrapper.style.flexWrap = 'wrap';
+          wrapper.style.flexWrap = 'nowrap';
           wrapper.style.justifyContent = 'center';
           for (let i = 1; i <= pages; i++) {
             const btn = document.createElement('button');

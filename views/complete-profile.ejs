@@ -28,6 +28,17 @@
             width: 500px;
             padding: 40px;
         }
+            /* Mobile tweaks */
+            @media (max-width: 768px) {
+                .profile-container { width: 100%; padding: 24px; margin: 16px; }
+                .user-info { flex-direction: column; align-items: flex-start; gap: 8px; }
+                .user-avatar { width: 48px; height: 48px; font-size: 20px; }
+            }
+            @media (max-width: 480px) {
+                body { padding: 12px; }
+                .profile-container { padding: 18px; margin: 12px; }
+                h1 { font-size: 20px; }
+            }
         
         .logo {
             margin-bottom: 20px;
