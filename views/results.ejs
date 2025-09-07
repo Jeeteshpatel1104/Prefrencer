@@ -647,10 +647,12 @@
   .summary-value { font-size: 1.2rem; }
   .summary-label { font-size: 0.85rem; }
 
-      /* Force header elements into single row */
-      .header-content { flex-direction: row !important; align-items: center !important; justify-content: space-between !important; }
-      .user-name { max-width: 45vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .user-info { gap:8px; }
+  /* Match index.ejs header mobile layout: single-line header with visible full name */
+  .header-content { flex-direction: row !important; align-items: center !important; justify-content: space-between !important; }
+  .header-logo { height: 34px !important; }
+  .user-info { display:flex !important; align-items:center !important; gap:8px !important; }
+  .user-name { font-size:13px !important; max-width:50vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .logout-btn { padding:6px 10px !important; font-size:13px !important; }
 
       /* hide big decorations and back link on mobile to reduce clutter and save vertical space */
       .decoration-1, .decoration-2, .back-nav { display: none !important; }
@@ -676,8 +678,8 @@
     }
     /* Ensure page titles and subtitles fit in one line on very narrow phones */
     @media (max-width: 360px) {
-      .hero-title { font-size: 18px !important; line-height:1.05; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .hero-subtitle { font-size: 12px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .hero-title { font-size: 24px !important; line-height:1.05; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .hero-subtitle { font-size: 12px !important;  }
     }
   </style>
 </head>
