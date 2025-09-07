@@ -674,6 +674,11 @@
       #pagination-tabs, #pagination-tabs-bottom { padding: 0 2px; gap:2px; }
       #pagination-tabs button, #pagination-tabs-bottom button { margin:0 1px; padding:2px 4px; min-width:24px; font-size:11px; }
     }
+    /* Ensure page titles and subtitles fit in one line on very narrow phones */
+    @media (max-width: 360px) {
+      .hero-title { font-size: 18px !important; line-height:1.05; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .hero-subtitle { font-size: 12px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    }
   </style>
 </head>
 <body>

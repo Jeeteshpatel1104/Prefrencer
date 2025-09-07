@@ -228,6 +228,14 @@
             /* Transform large multi-column dropdowns into scrollable blocks */
             .dropdown-options { max-height: 220px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         }
+                @media (max-width: 360px) {
+                    header { padding: 10px 12px; }
+                    /* Ensure main title and tagline fit on a single line on very narrow screens */
+                    .hero-title { font-size: 18px !important; line-height:1.05; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                    .hero-tag { font-size: 12px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                    /* Slightly reduce container side padding so content has more room */
+                    .container { padding-left: 8px; padding-right: 8px; }
+                }
 
         @media (max-width: 480px) {
             body { padding: 10px; }
