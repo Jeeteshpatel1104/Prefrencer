@@ -629,6 +629,14 @@
       .back-link { font-size: 13px; padding: 6px 8px; }
       .rank-tooltip { font-size: 13px; line-height: 1.2; min-width: 160px; }
     }
+
+    /* Mobile: show OR/CR labels and make rank-tooltip inline so it moves with the card when scrolled */
+    .rank-label.mobile-only { display: none; font-weight: 700; margin-right: 6px; }
+    @media (max-width: 600px) {
+      .rank-label.mobile-only { display: inline-block; }
+      /* Keep tooltip hidden by default (controlled by JS); make it flow in document so it moves with the card when scrolled */
+      .rank-container .rank-tooltip { position: static; box-shadow: var(--shadow); border-radius: 10px; margin-top: 8px; min-width: auto; }
+    }
     /* Mobile card override: present results as stacked cards and keep header in one line */
     @media (max-width: 600px) {
       .results-table { display: none !important; }
@@ -831,9 +839,9 @@
     <div class="hero">
       <h1 class="hero-title">College Search Results</h1>
       <p class="hero-subtitle">
-        Based on your JEE Mains Rank: <%= search && search.rank ? search.rank : 'N/A' %>
-        | Category: <%= search && search.selectedCaste ? search.selectedCaste : 'N/A' %>
-        | Domicile: <%= search && search.domicile ? search.domicile : 'N/A' %>
+  Based on your JEE Mains Rank: <%= search && search.rank ? search.rank : 'N/A' %>
+  | Category: <%= search && search.selectedCaste ? search.selectedCaste : 'N/A' %>
+  | Domicile: <%= search && search.domicile ? (search.domicile === 'Y' ? 'MP Resident' : (search.domicile === 'AI' ? 'ALL India' : search.domicile)) : 'N/A' %>
       </p>
       
       <div class="result-summary">
@@ -881,7 +889,7 @@
         <div class="rank-info-note mobile-only" style="margin-bottom:27px;">
           <div class="rank-info-box">
             <i class='bx bx-info-circle rank-info-icon' aria-hidden="true"></i>
-            <span class="rank-info-text">Click on <strong>Opening Rank</strong> or <strong>Closing Rank</strong> to view previous years' cutoffs.</span>
+            <span class="rank-info-text">Click on <strong>Opening Rank(OR)</strong> or <strong>Closing Rank(CR)</strong> to view previous years' cutoffs.</span>
           </div>
         </div>
 
@@ -896,7 +904,7 @@
         <div class="rank-info-note desktop-only" style="margin-left:12px;">
           <div class="rank-info-box" id="rank-info-box-desktop">
             <i class='bx bx-info-circle rank-info-icon' id="rank-info-toggle" title="Toggle rank info" style="cursor:pointer;" aria-hidden="true"></i>
-            <span class="rank-info-text">Hover on <strong>Opening Rank</strong> or <strong>Closing Rank</strong> to view previous years' cutoffs.</span>
+            <span class="rank-info-text">Hover on <strong>Opening Rank(OR)</strong> or <strong>Closing Rank(CR)</strong> to view previous years' cutoffs.</span>
           </div>
         </div>
       </div>
@@ -945,6 +953,7 @@
       const paginationBottom = document.getElementById('pagination-tabs-bottom');
       const resultsCountEl = document.getElementById('results-count');
       const table = document.querySelector('.results-table');
+  const resultsContainer = document.querySelector('.results-container');
 
       resultsCountEl.textContent = `Showing ${RAW_RESULTS.length} entries`;
 
@@ -1000,14 +1009,14 @@
             <div class="line2">${createBadge(r.institute_type)} <span>${escapeHtml(r.branch || '')}</span> <span>${escapeHtml(r.allotted_category || 'N/A')}</span></div>
             <div class="line3">
               <div class="rank-container">Round: ${escapeHtml(r.round || 'N/A')}</div>
-              <div class="rank-container opening">${escapeHtml(String(opening))}
+              <div class="rank-container opening"> <span class="rank-label mobile-only">OR:</span> ${escapeHtml(String(opening))}
                 <div class="rank-tooltip" style="display:none;">
                   <div class="rank-year"><span class="year-label">2024:</span><span>${escapeHtml(String(r.opening_rank_2024 || 'N/A'))}</span></div>
                   <div class="rank-year"><span class="year-label">2023:</span><span>${escapeHtml(String(r.opening_rank_2023 || 'N/A'))}</span></div>
                   <div class="rank-year"><span class="year-label">2022:</span><span>${escapeHtml(String(r.opening_rank_2022 || 'N/A'))}</span></div>
                 </div>
               </div>
-              <div class="rank-container closing">${escapeHtml(String(closing))}
+              <div class="rank-container closing"> <span class="rank-label mobile-only">CR:</span> ${escapeHtml(String(closing))}
                 <div class="rank-tooltip" style="display:none;">
                   <div class="rank-year"><span class="year-label">2024:</span><span>${escapeHtml(String(r.closing_rank_2024 || 'N/A'))}</span></div>
                   <div class="rank-year"><span class="year-label">2023:</span><span>${escapeHtml(String(r.closing_rank_2023 || 'N/A'))}</span></div>
@@ -1088,20 +1097,55 @@
       }
 
       function attachTooltipHandlers() {
-        // delegate hover on current rows
-        document.querySelectorAll('.rank-container').forEach((rc, idx) => {
+        // No-op here; we use a single delegated setup below (set up once)
+      }
+
+      // Setup delegated listeners once to preserve desktop hover and mobile click behavior
+      if (!window._rankTooltipDelegated) {
+        window._rankTooltipDelegated = true;
+        const isMobile = () => window.matchMedia && window.matchMedia('(max-width:600px)').matches;
+
+        // Hover (desktop): show floating tooltip using delegation
+        resultsContainer.addEventListener('mouseover', (e) => {
+          if (isMobile()) return;
+          const rc = e.target.closest('.rank-container');
+          if (!rc) return;
           const inner = rc.querySelector('.rank-tooltip');
           if (!inner) return;
-          rc.addEventListener('mouseenter', () => {
-            floating.innerHTML = inner.innerHTML;
-            floating.style.display = 'block';
-            // allow browser to render then position accurately
-            requestAnimationFrame(() => positionFloating(rc, idx === 0));
-          });
-          rc.addEventListener('mouseleave', () => {
+          floating.innerHTML = inner.innerHTML;
+          floating.style.display = 'block';
+          requestAnimationFrame(() => positionFloating(rc, false));
+        });
+
+        resultsContainer.addEventListener('mouseout', (e) => {
+          if (isMobile()) return;
+          const rc = e.target.closest('.rank-container');
+          if (!rc) return;
+          floating.style.display = 'none';
+          floating.innerHTML = '';
+        });
+
+        // Click (mobile): toggle inline tooltip which is part of the card
+        resultsContainer.addEventListener('click', (e) => {
+          if (!isMobile()) return;
+          const rc = e.target.closest('.rank-container');
+          if (!rc) return;
+          e.stopPropagation();
+          const inner = rc.querySelector('.rank-tooltip');
+          if (!inner) return;
+          // hide other open inline tooltips first
+          document.querySelectorAll('.rank-container .rank-tooltip').forEach(t => { if (t !== inner) t.style.display = 'none'; });
+          inner.style.display = inner.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Global click to close inline mobile tooltips when clicking outside
+        document.addEventListener('click', () => {
+          if (isMobile()) {
+            document.querySelectorAll('.rank-container .rank-tooltip').forEach(t => t.style.display = 'none');
+          } else {
             floating.style.display = 'none';
             floating.innerHTML = '';
-          });
+          }
         });
       }
 
