@@ -98,6 +98,13 @@ app.get('/login', (req, res) => req.isAuthenticated() ? res.redirect('/') : res.
 app.get('/complete-profile', ensureAuthenticated, (req, res) => {
     req.user.mobile ? res.redirect('/') : res.render('complete-profile', { user: req.user });
 });
+
+app.get('/terms-and-conditions', (req, res) => {
+    res.render('terms-and-conditions', { 
+        user: req.user || null 
+    });
+});
+
 app.post('/complete-profile', ensureAuthenticated, async (req, res) => {
     try {
         await pool.query('UPDATE users SET mobile = $1 WHERE id = $2', [req.body.mobile, req.user.id]);

@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>College Preference Finder</title>
+    <title>College Preferencer</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath d='M50 15 L80 45 L75 85 L25 85 L20 45 Z' fill='%234361ee'/%3E%3Ccircle cx='50' cy='45' r='14' fill='%2306d6a0'/%3E%3Ccircle cx='50' cy='70' r='8' fill='white'/%3E%3C/svg%3E" type="image/svg+xml">
     <style>
         :root {
             --primary: #4361ee;
@@ -45,10 +46,17 @@
       margin: 0 auto;
     }
 
-    .header-logo {
-      height: 40px;
+   .header-logo {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border-radius: 50%;
+        box-shadow: var(--shadow);
+        padding: 8px;
     }
-
     .user-info {
       display: flex;
       align-items: center;
@@ -251,6 +259,135 @@
             .user-name { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45vw; }
             .logout-btn { padding: 6px 10px; font-size: 13px; }
         }
+
+
+        /* Info anchor styling - fixed alignment */
+        .info-anchor {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 6px;
+            color: var(--primary);
+            text-decoration: none;
+            transition: var(--transition);
+            vertical-align: middle;
+        }
+
+        .info-anchor i {
+            font-size: 18px;
+        }
+
+        .info-anchor:hover {
+            color: var(--primary-dark);
+            transform: scale(1.1);
+        }
+
+        /* Description section styling with lighter background */
+        .description-section {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin: 40px 0;
+            position: relative;
+            z-index: 2;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+        }
+
+        .description-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 25px;
+            text-align: center;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .description-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border-radius: 2px;
+        }
+
+        .description-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+
+        .description-item {
+            padding: 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            border: 1px solid rgba(226, 232, 240, 0.6);
+        }
+
+        .description-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .description-item h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .description-item h3 i {
+            margin-right: 10px;
+            font-size: 1.4rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .description-item p {
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .description-section {
+                padding: 20px;
+            }
+            
+            .description-title {
+                font-size: 1.5rem;
+            }
+            
+            .description-item {
+                padding: 15px;
+            }
+            
+            .description-item h3 {
+                font-size: 1.1rem;
+            }
+        }
+
+      .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        
 </style>
 </head>
 <body>
@@ -261,7 +398,14 @@
     <!-- Header -->
     <header>
     <div class="header-content">
-      <img src="/images/MargDarshak.png" alt="MargDarshak logo" class="header-logo">
+      <div class="header-logo">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="48" fill="#4361ee" opacity="0.1"/>
+                        <path d="M50 15 L75 40 L70 75 L30 75 L25 40 Z" fill="#4361ee"/>
+                        <circle cx="50" cy="35" r="12" fill="#06d6a0"/>
+                        <circle cx="50" cy="60" r="7" fill="white"/>
+                    </svg>
+      </div>
       <div class="user-info">
         <% if (typeof user !== 'undefined' && user) { %>
           <span class="user-name">Welcome, <%= user.name || user.displayName || user.email %></span>
@@ -288,7 +432,7 @@
                     <circle cx="50" cy="55" r="5" fill="white"/>
                 </svg>
             </div>
-            <h1 class="hero-title">College Preference Finder</h1>
+            <h1 class="hero-title">College Preferencer</h1>
             <div class="hero-tag">
                 <i class='bx bx-check-circle'></i> No Hidden Charges, 100% Free
             </div>
@@ -299,11 +443,13 @@
             <!-- Rank/Domicile/Caste Row -->
             <div class="form-grid">
                 <div class="form-group">
-                    <label class="form-label" for="rank">Rank:</label>
+                    <label class="form-label" for="rank">JEE Main Rank:</label>
                     <input type="number" id="rank" name="rank" class="form-input" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="domicile">Domicile:</label>
+                    <label class="form-label" for="domicile">Domicile:
+                        <a href="#domicile-desc" class="info-anchor"><i class='bx bx-info-circle'></i></a>
+                    </label>
                     <select id="domicile" name="domicile" class="form-select" onchange="handleDomicileChange()" required>
                         <option value='AI'>All India</option>
                         <option value='Y'>MP Resident</option>
@@ -337,7 +483,9 @@
                    
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Select Categories:</label>
+                    <label class="form-label">Select Categories:
+                        <a href="#categories-desc" class="info-anchor"><i class='bx bx-info-circle'></i></a>
+                    </label>
                     <div class="dropdown">
                         <button type="button" class="dropdown-btn" onclick="toggleDropdown('categoryDropdown')">
                             Select Categories <i class='bx bx-chevron-down'></i>
@@ -352,20 +500,24 @@
             <!-- Rank Range/Sort By/Round (visible by default) -->
             <div class="form-grid">
                 <div class="form-group">
-                    <label class="form-label" for="rank_range">Rank Range:</label>
-                    <select name="rank_range" id="rank_range" class="form-select">
-                        <option value="10000000">Start To End</option>
-                        <option value="1000000">±10 lakh</option>
-                        <option value="500000">±5 lakh</option>
-                        <option value="200000">±2 lakh</option>
-                        <option value="100000">±1 lakh</option>
-                        <option value="50000">±50k</option>
-                        <option value="20000">±20k</option>
-                        <option value="10000">±10k</option>
-                    </select>
+                    <label class="form-label" for="rank_range">Rank Range:
+                        <a href="#rankrange-desc" class="info-anchor"><i class='bx bx-info-circle'></i></a>
+                    </label>
+
+<select name="rank_range" id="rank_range" class="form-select">
+    <option value="10000000">Start To End</option>
+    <option value="500000">±5 lakh</option>
+    <option value="200000">±2 lakh</option>
+    <option value="100000" selected>±1 lakh</option>
+    <option value="50000">±50k</option>
+    <option value="20000">±20k</option>
+    <option value="10000">±10k</option>
+</select>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="sort_by">Sort By:</label>
+                    <label class="form-label" for="sort_by">Sort By:
+                        <a href="#sortby-desc" class="info-anchor"><i class='bx bx-info-circle'></i></a>
+                    </label>
                     <select id="sort_by" name="sort_by" class="form-select">
                         <option value="lastYearTrend">Last Year Trend</option>
                         <option value="closing_rank">Closing Rank</option>
@@ -429,7 +581,7 @@
                         <label class="form-label">College Name:</label>
                         <div class="dropdown">
                             <button type="button" class="dropdown-btn" onclick="toggleDropdown('collegeDropdown')">
-                                Select College Names <i class='bx bx-chevron-down'></i>
+                                Select Colleges <i class='bx bx-chevron-down'></i>
                             </button>
                             <div id="collegeDropdown" class="dropdown-content">
                                 <div id="collegeCheckboxes"></div>
@@ -458,6 +610,36 @@
         <div class="info-box">
             <i class='bx bx-info-circle info-icon'></i>
             <p class="info-text">Fill all the fields above to get personalized college recommendations based on your JEE Mains rank and preferences.</p>
+        </div>
+
+        <!-- Description Section -->
+        <div class="description-section">
+            <h2 class="description-title">Understanding Your Filters</h2>
+            <div class="description-grid">
+                <div class="description-item" id="domicile-desc">
+                    <h3><i class='bx bx-map'></i> Domicile</h3>
+                    <p>Select "MP Resident" if you have permanent residency in Madhya Pradesh. Choose "All India" if you're from any other state or union territory. This helps identify colleges with regional quotas that may offer you admission advantages.</p>
+                </div>
+                
+                <div class="description-item" id="categories-desc">
+                    <h3><i class='bx bx-category'></i> Select Categories</h3>
+                    <p>Some colleges (particularly private institutions) may not offer specific quotas for reserved categories like OBC, EWS, SC, ST, or Female candidates. In such cases, students from these categories are considered under the Unreserved (UR) category. Selecting multiple categories ensures you see all possible options available to you. If any college has some or all the selected categories, the result will display the category whose closing rank is highest among them.</p>
+                </div>
+                
+                <div class="description-item" id="rankrange-desc">
+                    <h3><i class='bx bx-line-chart'></i> Rank Range</h3>
+                    <p>Narrow down your college options based on how close they are to your JEE Main rank. For example, selecting ±20k will show colleges with closing ranks between [Your Rank - 20,000] and [Your Rank + 20,000]. Choose "Start To End" to see all available options regardless of your rank.</p>
+                </div>
+                
+                <div class="description-item" id="sortby-desc">
+                    <h3><i class='bx bx-sort'></i> Sort By</h3>
+                    <p>Organize your results based on different criteria: "Last Year Trend" shows colleges with similar historical admission patterns, "Closing Rank" sorts by the highest rank admitted last year, and "Opening Rank" sorts by the lowest rank admitted.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2025 College Preferencer. All rights reserved.</p>
         </div>
     </div>
 
@@ -1121,6 +1303,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // ensure any time options are replaced programmatically we keep UI in sync
         // e.g., handleDomicileChange and other code replace options — MutationObserver above will handle it
+        
+
+
+                    // Smooth scrolling for info anchors
+        document.querySelectorAll('.info-anchor').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    
+                    // Add highlight effect
+                    const originalBg = targetElement.style.backgroundColor;
+                    targetElement.style.transition = 'all 0.5s ease';
+                    targetElement.style.backgroundColor = 'rgba(67, 97, 238, 0.15)';
+                    
+                    setTimeout(() => {
+                        targetElement.style.backgroundColor = originalBg;
+                    }, 2000);
+                    
+                    // Remove highlight after another 0.5s
+                    setTimeout(() => {
+                        targetElement.style.transition = '';
+                    }, 2500);
+                }
+            });
+        });
+                        
     </script>
 </body>
 </html>

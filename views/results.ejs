@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>College Search Results | MPDTE Preference Finder</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+   <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Preferencer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+    <!-- Add favicon here -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath d='M50 15 L80 45 L75 85 L25 85 L20 45 Z' fill='%234361ee'/%3E%3Ccircle cx='50' cy='45' r='14' fill='%2306d6a0'/%3E%3Ccircle cx='50' cy='70' r='8' fill='white'/%3E%3C/svg%3E" type="image/svg+xml">
   <style>
     :root {
       --primary: #4361ee;
@@ -94,8 +96,16 @@
       margin: 0 auto;
     }
 
-    .header-logo {
-      height: 40px;
+   .header-logo {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border-radius: 50%;
+        box-shadow: var(--shadow);
+        padding: 8px;
     }
 
     .user-info {
@@ -187,7 +197,7 @@
       border-radius: 16px;
       padding: 20px;
       box-shadow: var(--shadow);
-      margin-bottom: 30px;
+      margin-bottom: 10px;
       display: flex;
       flex-wrap: wrap;
       gap: 15px;
@@ -681,8 +691,106 @@
       .hero-title { font-size: 24px !important; line-height:1.05; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
       .hero-subtitle { font-size: 12px !important;  }
     }
+     .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+
+
+    /* Rank information note styles */
+.rank-info-note {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.rank-info-box {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(67, 97, 238, 0.08);
+    padding: 12px 20px;
+    border-radius: 12px;
+    color: #4361ee;
+    font-size: 14px;
+    border-left: 4px solid #4361ee;
+}
+
+.rank-info-icon {
+    font-size: 20px;
+    margin-right: 10px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .rank-info-box {
+        padding: 10px 15px;
+        font-size: 13px;
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+    }
+    
+    .rank-info-icon {
+        margin-right: 0;
+        margin-bottom: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .rank-info-box {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+}
+
+/* Desktop vs Mobile helpers: show/hide appropriate info note */
+.desktop-only { display: none; }
+.mobile-only { display: block; }
+
+@media (min-width: 601px) {
+  .desktop-only { display: block; }
+  .mobile-only { display: none; }
+}
+
+/* Ensure the info icon and text stay on same line on small screens in the mobile copy */
+.rank-info-box { display: inline-flex; align-items: center; gap:10px; }
+.rank-info-icon { font-size: 18px; }
+.rank-info-text { display: inline-block; }
+
+/* Collapsible state for desktop box */
+#rank-info-box-desktop.collapsed .rank-info-text { display: none; }
+#rank-info-box-desktop.collapsed { padding-right: 8px; }
+
+
   </style>
 </head>
+<style>
+/* Small-screen override: keep info icon and text on same line for mobile */
+@media (max-width: 600px) {
+  .rank-info-box { flex-direction: row !important; align-items: center !important; text-align: left !important; gap: 8px; }
+  .rank-info-text { display: inline !important; white-space: normal !important; }
+  /* reduce hero bottom margin on small screens so the mobile note centers between summary and table */
+  .hero { margin-bottom: 6px !important; }
+}
+</style>
+<style>
+/* Tweak: ensure mobile note sits visually between summary and table */
+@media (max-width: 600px) {
+  .rank-info-note.mobile-only { display: flex !important; justify-content: center; margin: 6px 0 6px 0; }
+  .rank-info-box { padding: 8px 12px; max-width: 100%; }
+}
+
+/* Tweak: tighten gap between icon and text on desktop inline box */
+@media (min-width: 601px) {
+  #rank-info-box-desktop { padding: 10px 12px; }
+  #rank-info-box-desktop .rank-info-icon { margin-right: 6px; }
+  #rank-info-box-desktop .rank-info-text { margin-left: 2px; }
+}
+</style>
+</style>
 <body>
   <!-- Decorative Elements -->
   <div class="decoration decoration-1"></div>
@@ -691,7 +799,14 @@
   <!-- Header -->
   <header>
     <div class="header-content">
-      <img src="/images/MargDarshak.png" alt="MargDarshak logo" class="header-logo">
+      <div class="header-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="48" fill="#4361ee" opacity="0.1"/>
+                        <path d="M50 15 L75 40 L70 75 L30 75 L25 40 Z" fill="#4361ee"/>
+                        <circle cx="50" cy="35" r="12" fill="#06d6a0"/>
+                        <circle cx="50" cy="60" r="7" fill="white"/>
+          </svg>
+      </div>
       <div class="user-info">
         <% if (typeof user !== 'undefined' && user) { %>
           <span class="user-name">Welcome, <%= user.name || user.displayName || user.email %></span>
@@ -762,13 +877,29 @@
         </div>
       </div>
     </div>
+        <!-- Note about rank hover information (mobile-only: kept above results for small screens) -->
+        <div class="rank-info-note mobile-only" style="margin-bottom:27px;">
+          <div class="rank-info-box">
+            <i class='bx bx-info-circle rank-info-icon' aria-hidden="true"></i>
+            <span class="rank-info-text">Click on <strong>Opening Rank</strong> or <strong>Closing Rank</strong> to view previous years' cutoffs.</span>
+          </div>
+        </div>
 
     <!-- Results Container -->
     <div class="results-container">
       <div class="table-header">
          <div class="results-count" id="results-count">Showing <%= results && results.length ? results.length : 0 %> entries</div>
       </div>
-      <div id="pagination-tabs" style="margin-bottom:12px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;"></div>
+      <div class="pagination-info-row" style="margin-bottom:12px; display:flex; gap:8px; align-items:center; justify-content:space-between;">
+        <div id="pagination-tabs" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;"></div>
+        <!-- Desktop-only rank info: shown inline with pagination; has a toggle on the info icon -->
+        <div class="rank-info-note desktop-only" style="margin-left:12px;">
+          <div class="rank-info-box" id="rank-info-box-desktop">
+            <i class='bx bx-info-circle rank-info-icon' id="rank-info-toggle" title="Toggle rank info" style="cursor:pointer;" aria-hidden="true"></i>
+            <span class="rank-info-text">Hover on <strong>Opening Rank</strong> or <strong>Closing Rank</strong> to view previous years' cutoffs.</span>
+          </div>
+        </div>
+      </div>
       
   <table class="results-table">
         <thead>
@@ -797,6 +928,9 @@
         <i class='bx bx-search-alt'></i> Search Again
       </a>
     </div>
+    <div class="footer">
+            <p>&copy; 2025 College Preferencer. All rights reserved.</p>
+    </div>
   </div>
 
   <script>
@@ -824,6 +958,7 @@
 
       function renderRow(r, idx) {
         const opening = r.opening_rank_2024 || r.opening_rank || 'N/A';
+      
         const closing = r.closing_rank_2024 || r.closing_rank || 'N/A';
         return `
           <tr>
@@ -1018,6 +1153,27 @@
       // initial render
       renderPage(1);
     });
+  </script>
+  <script>
+    // Desktop rank-info toggle: clicking the info icon will hide/show the explanatory text
+    (function() {
+      const TOGGLE_ID = 'rank-info-toggle';
+      const BOX_ID = 'rank-info-box-desktop';
+      const storageKey = 'rankInfoCollapsed_v1';
+      const toggle = document.getElementById(TOGGLE_ID);
+      const box = document.getElementById(BOX_ID);
+      if (!toggle || !box) return;
+
+      // initialize state from sessionStorage (per-tab)
+      const collapsed = sessionStorage.getItem(storageKey) === '1';
+      if (collapsed) box.classList.add('collapsed');
+
+      toggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const nowCollapsed = box.classList.toggle('collapsed');
+        sessionStorage.setItem(storageKey, nowCollapsed ? '1' : '0');
+      });
+    })();
   </script>
   <script>
     // Wire navigation to preserve saved filters (stored by index.ejs as 'pf_filters_v1')

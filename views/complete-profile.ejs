@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Complete Profile - College Predictor</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath d='M50 15 L80 45 L75 85 L25 85 L20 45 Z' fill='%234361ee'/%3E%3Ccircle cx='50' cy='45' r='14' fill='%2306d6a0'/%3E%3Ccircle cx='50' cy='70' r='8' fill='white'/%3E%3C/svg%3E" type="image/svg+xml">
     <style>
         * {
             margin: 0;
@@ -28,17 +29,19 @@
             width: 500px;
             padding: 40px;
         }
-            /* Mobile tweaks */
-            @media (max-width: 768px) {
-                .profile-container { width: 100%; padding: 24px; margin: 16px; }
-                .user-info { flex-direction: column; align-items: flex-start; gap: 8px; }
-                .user-avatar { width: 48px; height: 48px; font-size: 20px; }
-            }
-            @media (max-width: 480px) {
-                body { padding: 12px; }
-                .profile-container { padding: 18px; margin: 12px; }
-                h1 { font-size: 20px; }
-            }
+        
+        /* Mobile tweaks */
+        @media (max-width: 768px) {
+            .profile-container { width: 100%; padding: 24px; margin: 16px; }
+            .user-info { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .user-avatar { width: 48px; height: 48px; font-size: 20px; }
+        }
+        
+        @media (max-width: 480px) {
+            body { padding: 12px; }
+            .profile-container { padding: 18px; margin: 12px; }
+            h1 { font-size: 20px; }
+        }
         
         .logo {
             margin-bottom: 20px;
@@ -90,6 +93,7 @@
         
         .form-group {
             margin-bottom: 20px;
+            position: relative;
         }
         
         label {
@@ -114,6 +118,17 @@
             border-color: #4285F4;
         }
         
+        input.error {
+            border-color: #ff3860;
+        }
+        
+        .error-message {
+            color: #ff3860;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        
         button {
             background-color: #4285F4;
             color: white;
@@ -130,12 +145,49 @@
         button:hover {
             background-color: #3367D6;
         }
+        
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        /* Custom alert styling */
+        .custom-alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #ff3860;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            display: none;
+            max-width: 90%;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
+    <div class="custom-alert" id="customAlert"></div>
+    
     <div class="profile-container">
         <div class="logo">
-            <img src="/images/MargDarshak.png" alt="MargDarshak logo" class="h-10">
+            <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="48" fill="#4361ee" opacity="0.1"/>
+                <path d="M50 20 L70 40 L65 70 L35 70 L30 40 Z" fill="#4361ee"/>
+                <circle cx="50" cy="35" r="8" fill="#06d6a0"/>
+                <circle cx="50" cy="55" r="5" fill="white"/>
+            </svg>
         </div>
         <h1>Complete Your Profile</h1>
         
@@ -149,14 +201,125 @@
             </div>
         </div>
         
-        <form action="/complete-profile" method="POST">
+        <form id="profileForm" action="/complete-profile" method="POST">
             <div class="form-group">
                 <label for="mobile">Mobile Number</label>
-                <input type="tel" name="mobile" id="mobile" placeholder="Enter your mobile number" required>
+                <input type="tel" name="mobile" id="mobile" placeholder="Enter your 10-digit mobile number" required maxlength="10">
+                <div class="error-message" id="mobileError"></div>
             </div>
             
-            <button type="submit">Continue to Dashboard</button>
+            <button type="submit" id="submitBtn">Continue to Dashboard</button>
         </form>
+
+        <div class="footer">
+            <p>&copy; 2025 College Preferencer. All rights reserved.</p>
+        </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileInput = document.getElementById('mobile');
+            const mobileError = document.getElementById('mobileError');
+            const profileForm = document.getElementById('profileForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const customAlert = document.getElementById('customAlert');
+            
+            // Function to show custom alert
+            function showAlert(message) {
+                customAlert.textContent = message;
+                customAlert.style.display = 'block';
+                
+                // Hide alert after 3 seconds
+                setTimeout(() => {
+                    customAlert.style.display = 'none';
+                }, 3000);
+            }
+            
+            // Validate mobile number on input
+            mobileInput.addEventListener('input', function() {
+                const value = this.value.replace(/\D/g, ''); // Remove non-digit characters
+                this.value = value; // Set the cleaned value back
+                
+                // Validate length and starting digit
+                if (value.length > 0) {
+                    if (value.length < 10) {
+                        mobileError.textContent = 'Mobile number should be 10 digits';
+                        mobileError.style.display = 'block';
+                        mobileInput.classList.add('error');
+                        submitBtn.disabled = true;
+                    } else if (!['6', '7', '8', '9'].includes(value.charAt(0))) {
+                        mobileError.textContent = 'Mobile number should start with 6, 7, 8, or 9';
+                        mobileError.style.display = 'block';
+                        mobileInput.classList.add('error');
+                        submitBtn.disabled = true;
+                    } else {
+                        mobileError.style.display = 'none';
+                        mobileInput.classList.remove('error');
+                        submitBtn.disabled = false;
+                    }
+                } else {
+                    mobileError.style.display = 'none';
+                    mobileInput.classList.remove('error');
+                    submitBtn.disabled = false;
+                }
+            });
+            
+            // Validate form on submission
+            profileForm.addEventListener('submit', function(e) {
+                const mobileValue = mobileInput.value.trim();
+                
+                // Check if mobile number is empty
+                if (!mobileValue) {
+                    e.preventDefault();
+                    mobileError.textContent = 'Mobile number is required';
+                    mobileError.style.display = 'block';
+                    mobileInput.classList.add('error');
+                    return;
+                }
+                
+                // Check if mobile number is exactly 10 digits
+                if (mobileValue.length !== 10) {
+                    e.preventDefault();
+                    mobileError.textContent = 'Mobile number should be exactly 10 digits';
+                    mobileError.style.display = 'block';
+                    mobileInput.classList.add('error');
+                    showAlert('Mobile number should be exactly 10 digits');
+                    return;
+                }
+                
+                // Check if mobile number starts with valid digit
+                if (!['6', '7', '8', '9'].includes(mobileValue.charAt(0))) {
+                    e.preventDefault();
+                    mobileError.textContent = 'Mobile number should start with 6, 7, 8, or 9';
+                    mobileError.style.display = 'block';
+                    mobileInput.classList.add('error');
+                    showAlert('Honesty is the best policy');
+                    return;
+                }
+                
+                // If all validations pass, allow form submission
+            });
+            
+            // Allow only numbers in mobile field
+            mobileInput.addEventListener('keydown', function(e) {
+                // Allow: backspace, delete, tab, escape, enter
+                if ([46, 8, 9, 27, 13].includes(e.keyCode) || 
+                    // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                    (e.keyCode === 65 && e.ctrlKey === true) || 
+                    (e.keyCode === 67 && e.ctrlKey === true) || 
+                    (e.keyCode === 86 && e.ctrlKey === true) || 
+                    (e.keyCode === 88 && e.ctrlKey === true) ||
+                    // Allow: home, end, left, right
+                    (e.keyCode >= 35 && e.keyCode <= 39)) {
+                    return;
+                }
+                
+                // Ensure it's a number and stop the keypress if not
+                if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
 </body>
 </html>

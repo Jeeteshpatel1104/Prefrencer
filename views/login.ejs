@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - MPDTE College Preference Finder 2025</title>
+    <title>Login - MPDTE College Preferencer 2025</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath d='M50 15 L80 45 L75 85 L25 85 L20 45 Z' fill='%234361ee'/%3E%3Ccircle cx='50' cy='45' r='14' fill='%2306d6a0'/%3E%3Ccircle cx='50' cy='70' r='8' fill='white'/%3E%3C/svg%3E" type="image/svg+xml">
     <style>
         :root {
             --primary: #4361ee;
@@ -288,17 +289,18 @@
             color: var(--text);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 14px 20px;
-            font-size: 16px;
-            font-weight: 500;
+            padding: 16px 20px;
+            font-size: 18px;
+            font-weight: 600;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
             transition: var(--transition);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            text-decoration: none;
         }
 
         .google-btn:hover {
@@ -313,91 +315,82 @@
         }
 
         .google-icon {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             margin-right: 12px;
         }
 
-        .divider {
+        /* Process Section */
+        .process-container {
+            margin-top: 20px;
+            padding: 25px;
+            background: rgba(67, 97, 238, 0.05);
+            border-radius: 16px;
+            text-align: center;
+        }
+        
+        .process-title {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 25px;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .process-item {
             display: flex;
             align-items: center;
-            margin: 30px 0;
-            color: var(--border);
-            position: relative;
+            margin-bottom: 20px;
+            text-align: left;
+            padding: 12px 15px;
+            border-radius: 12px;
+            transition: var(--transition);
+            background: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
         }
-
-        .divider::before,
-        .divider::after {
-            content: "";
-            flex: 1;
-            border-bottom: 1px solid var(--border);
+        
+        .process-item:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
         }
-
-        .divider span {
-            padding: 0 15px;
-            color: var(--text-light);
-            font-size: 14px;
-            background: var(--light);
-            position: relative;
-            z-index: 1;
+        
+        .process-number {
+        width: 32px;
+        height: 32px;
+        background: rgba(67, 97, 238, 0.1); /* Lighter background */
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        flex-shrink: 0;
+        color: var(--primary); /* Same color as "How It Works" title */
+        font-size: 16px;
+        font-weight: 600;
+        border: 1px solid rgba(67, 97, 238, 0.2); /* Subtle border */
+        }
+        .process-text {
+            font-size: 1rem;
+            color: var(--text);
+            line-height: 1.4;
             font-weight: 500;
         }
-
-        .form-group {
-            margin-bottom: 25px;
-            position: relative;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 16px 20px 16px 48px;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            font-size: 16px;
-            transition: var(--transition);
-            background-color: white;
-            color: var(--text);
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.15);
-        }
-
-        .form-icon {
-            position: absolute;
-            left: 18px;
-            top: 50%;
-            transform: translateY(-50%);
+        
+        .privacy-note {
+            font-size: 0.85rem;
             color: var(--text-light);
-            font-size: 18px;
-        }
-
-        .login-btn {
-            background: linear-gradient(to right, var(--primary), var(--primary-dark));
-            color: white;
-            border: none;
+            margin-top: 25px;
+            line-height: 1.5;
+            background: rgba(67, 97, 238, 0.05);
+            padding: 15px;
             border-radius: 12px;
-            padding: 16px 20px;
-            font-size: 17px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            transition: var(--transition);
-            margin-top: 10px;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+            text-align: center;
         }
-
-        .login-btn:hover {
-            background: linear-gradient(to right, var(--primary-dark), #2f44c0);
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
-        }
-
-        .login-btn:active {
-            transform: translateY(0);
+        
+        .privacy-note i {
+            color: var(--primary);
+            margin-right: 5px;
         }
 
         .footer {
@@ -433,12 +426,6 @@
 
         .footer a:hover::after {
             width: 100%;
-        }
-
-        .signup-link {
-            display: block;
-            margin-top: 15px;
-            font-weight: 500;
         }
 
         /* Animations */
@@ -518,6 +505,19 @@
             .feature-text {
                 font-size: 1rem;
             }
+            
+            .process-container {
+                padding: 15px;
+            }
+            
+            .process-text {
+                font-size: 0.9rem;
+            }
+            
+            .google-btn {
+                font-size: 16px;
+                padding: 14px 20px;
+            }
         }
     </style>
 </head>
@@ -530,8 +530,8 @@
         
         <!-- Left Content Section -->
         <div class="content-section">
-            <div class="tag">100% FREE • TRUSTED BY 10,000+ STUDENTS • Made by IITians</div>
-            <h1>MPDTE College Preference Finder 2025</h1>
+            <div class="tag">100% FREE • TRUSTED BY STUDENTS • Made by Experts</div>
+            <h1>MPDTE College Preferencer 2025</h1>
             <h2>Powered by MPDTE Cutoff Data & IITian Expertise</h2>
             
             <div class="feature-list">
@@ -550,7 +550,7 @@
             </div>
             
             <div class="testimonial floating">
-                <p>Our College Preference Finder 2025 helps you predict admission chances in Top Government, Private, and Self-Financed Engineering colleges across Madhya Pradesh based on your JEE Mains 2025 rank.</p>
+                <p>Our College Preferencer 2025 helps you predict admission chances in Top Government, Private, and Self-Financed Engineering colleges across Madhya Pradesh based on your JEE Mains 2025 rank.</p>
                 <div class="testimonial-author"><i class="fas fa-graduation-cap"></i> - Founders, IIT Alumni</div>
             </div>
         </div>
@@ -566,7 +566,7 @@
                         <circle cx="50" cy="55" r="5" fill="white"/>
                     </svg>
                 </div>
-                <div class="logo-text">MargDarshak</div>
+                <div class="logo-text">College Preferencer</div>
             </div>
             <h1 class="login-title">Welcome Back</h1>
             <p class="login-subtitle">Sign in to access your personalized dashboard and college recommendations</p>
@@ -578,25 +578,33 @@
                 Continue with Google
             </a>
             
-            <div class="divider">
-                <span>OR</span>
+            <div class="process-container">
+                <div class="process-title">How It Works</div>
+                
+                <div class="process-item">
+                    <div class="process-number">1</div>
+                    <div class="process-text">Sign in with Google for instant access</div>
+                </div>
+                
+                <div class="process-item">
+                    <div class="process-number">2</div>
+                    <div class="process-text">Enter your JEE Mains 2025 rank</div>
+                </div>
+                
+                <div class="process-item">
+                    <div class="process-number">3</div>
+                    <div class="process-text">Use filters to refine your preferences</div>
+                </div>
+                
+                <div class="process-item">
+                    <div class="process-number">4</div>
+                    <div class="process-text">Get personalized college recommendations</div>
+                </div>
             </div>
             
-            <form action="/login" method="POST">
-                <div class="form-group">
-                    <i class="bx bx-envelope form-icon"></i>
-                    <input type="email" name="email" placeholder="Email address" required>
-                </div>
-                <div class="form-group">
-                    <i class="bx bx-lock form-icon"></i>
-                    <input type="password" name="password" placeholder="Password" required>
-                </div>
-                <button type="submit" class="login-btn">Sign In</button>
-            </form>
             
             <div class="footer">
-                By continuing, you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.
-                <div class="signup-link">Don't have an account? <a href="#" style="font-weight: 600;">Sign up now</a></div>
+                By continuing, you agree to our <a href="/terms-and-conditions">Terms and Privacy Policy</a>.
             </div>
         </div>
     </div>
@@ -628,8 +636,21 @@
                 loginForm.style.transform = "translateY(0)";
             }, 500);
             
+            // Animate process items
+            const processItems = document.querySelectorAll('.process-item');
+            processItems.forEach((item, index) => {
+                item.style.opacity = "0";
+                item.style.transform = "translateY(10px)";
+                item.style.transition = "opacity 0.5s ease, transform 0.5s ease";
+                
+                setTimeout(() => {
+                    item.style.opacity = "1";
+                    item.style.transform = "translateY(0)";
+                }, 800 + (index * 100));
+            });
+            
             // Add hover effects to buttons
-            const buttons = document.querySelectorAll('.google-btn, .login-btn');
+            const buttons = document.querySelectorAll('.google-btn');
             buttons.forEach(button => {
                 button.addEventListener('mouseenter', function() {
                     this.style.transform = 'translateY(-3px)';
