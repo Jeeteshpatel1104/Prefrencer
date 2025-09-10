@@ -975,7 +975,7 @@
         <div class="rank-info-note mobile-only" style="margin-bottom:27px;">
           <div class="rank-info-box">
             <i class='bx bx-info-circle rank-info-icon' aria-hidden="true"></i>
-            <span class="rank-info-text">Click on <strong>Opening Rank(OR)</strong> or <strong>Closing Rank(CR)</strong> to view previous years' cutoffs.</span>
+            <span class="rank-info-text">Click on <strong>Opening Rank(OR)</strong>, <strong>Closing Rank(CR)</strong>, or the <strong>color strip</strong> to view past cutoffs or probabilities.</span>
           </div>
         </div>
 
@@ -990,7 +990,7 @@
         <div class="rank-info-note desktop-only" style="margin-left:12px;">
           <div class="rank-info-box" id="rank-info-box-desktop">
             <i class='bx bx-info-circle rank-info-icon' id="rank-info-toggle" title="Toggle rank info" style="cursor:pointer;" aria-hidden="true"></i>
-            <span class="rank-info-text">Hover on <strong>Opening Rank(OR)</strong> or <strong>Closing Rank(CR)</strong> to view previous years' cutoffs.</span>
+            <span class="rank-info-text">Hover on <strong>OR</strong>, <strong>CR</strong>, or the <strong>color strip</strong> to view past cutoffs or probabilities.</span>
           </div>
         </div>
       </div>
@@ -1004,8 +1004,8 @@
             <th>Branch</th>
             <th>Category</th>
             <th>Round</th>
-            <th>Opening Rank</th>
-            <th>Closing Rank</th>
+            <th>Opening Rank (OR)</th>
+            <th>Closing Rank (CR)</th>
           </tr>
         </thead>
         <tbody id="results-tbody">
@@ -1100,11 +1100,11 @@
   
   let tooltipText = '';
   if (probability === 'high') {
-    tooltipText = 'High probability: Your rank is better than all historical cutoffs';
+    tooltipText = '<strong>High probability:</strong> Your rank is better than all historical cutoffs';
   } else if (probability === 'medium') {
-    tooltipText = 'Medium probability: Mixed results compared to historical cutoffs';
+    tooltipText = '<strong>Medium probability:</strong> Mixed results compared to historical cutoffs';
   } else if (probability === 'low') {
-    tooltipText = 'Low probability: Your rank does not meet the historical cutoffs';
+    tooltipText = '<strong>Low probability:</strong> Your rank does not meet the historical cutoffs';
   } else {
     tooltipText = 'Insufficient data to calculate probability';
   }
@@ -1151,11 +1151,11 @@
   
   let tooltipText = '';
   if (probability === 'high') {
-    tooltipText = 'High probability: Your rank is better than all historical cutoffs';
+    tooltipText = '<strong>High probability:</strong> Your rank is better than all historical cutoffs';
   } else if (probability === 'medium') {
-    tooltipText = 'Medium probability: Mixed results compared to historical cutoffs';
+    tooltipText = '<strong>Medium probability:</strong> Mixed results compared to historical cutoffs';
   } else if (probability === 'low') {
-    tooltipText = 'Low probability: Your rank is worse than historical cutoffs';
+    tooltipText = '<strong>Low probability:</strong> Your rank does not meet the historical cutoffs';
   } else {
     tooltipText = 'Insufficient data to calculate probability';
   }
