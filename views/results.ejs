@@ -798,6 +798,92 @@
   #rank-info-box-desktop .rank-info-text { margin-left: 2px; }
 }
 </style>
+<style>
+  /* ... your existing CSS ... */
+
+  /* Probability indicator styles */
+  .probability-indicator {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    border-radius: 3px 0 0 3px;
+  }
+  
+  .probability-high {
+    background: linear-gradient(to bottom, #4ade80, #16a34a);
+  }
+  
+  .probability-medium {
+    background: linear-gradient(to bottom, #fde047, #eab308);
+  }
+  
+  .probability-low {
+    background: linear-gradient(to bottom, #f87171, #dc2626);
+  }
+  
+  .probability-unknown {
+    background: linear-gradient(to bottom, #94a3b8, #64748b);
+  }
+  
+  /* Position relative for table rows and cards */
+  .results-table tbody tr {
+    position: relative;
+  }
+  
+  .result-card {
+    position: relative;
+    padding-left: 16px !important; /* Make space for indicator on mobile cards */
+  }
+  
+  /* Adjust for the indicator on desktop table */
+  .results-table tbody td:first-child {
+    padding-left: 26px !important; /* Make space for indicator */
+  }
+  
+  /* Mobile indicator for cards */
+  .result-card .probability-indicator {
+    width: 6px;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    position: absolute;
+    border-radius: 3px 0 0 3px;
+  }
+  
+  /* Tooltip for probability indicator */
+  .probability-tooltip {
+    display: none;
+    position: absolute;
+    background: white;
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    z-index: 100;
+    font-size: 12px;
+    width: max-content;
+    max-width: 250px;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  .probability-indicator:hover + .probability-tooltip {
+    display: block;
+  }
+  
+  /* For mobile cards */
+  .result-card .probability-tooltip {
+    left: 16px;
+    top: auto;
+    bottom: 100%;
+    transform: none;
+    margin-bottom: 5px;
+  }
+
+  /* ... rest of your existing CSS ... */
 </style>
 <body>
   <!-- Decorative Elements -->
@@ -965,68 +1051,141 @@
         return '<span class="institute-badge badge-private">PRIVATE</span>';
       }
 
-      function renderRow(r, idx) {
-        const opening = r.opening_rank_2024 || r.opening_rank || 'N/A';
-      
-        const closing = r.closing_rank_2024 || r.closing_rank || 'N/A';
-        return `
-          <tr>
-            <td>${idx}</td>
-            <td class="college-name">${escapeHtml(r.college_name)}</td>
-            <td>${createBadge(r.institute_type)}</td>
-            <td>${escapeHtml(r.branch || '')}</td>
-            <td>${escapeHtml(r.allotted_category || 'N/A')}</td>
-            <td>${escapeHtml(r.round || 'N/A')}</td>
-            <td>
-              <div class="rank-container opening">${escapeHtml(String(opening))}
-                <div class="rank-tooltip" style="display:none;">
-                  <div class="rank-year"><span class="year-label">2024:</span><span>${escapeHtml(String(r.opening_rank_2024 || 'N/A'))}</span></div>
-                  <div class="rank-year"><span class="year-label">2023:</span><span>${escapeHtml(String(r.opening_rank_2023 || 'N/A'))}</span></div>
-                  <div class="rank-year"><span class="year-label">2022:</span><span>${escapeHtml(String(r.opening_rank_2022 || 'N/A'))}</span></div>
-                </div>
-              </div>
-            </td>
-            <td>
-              <div class="rank-container closing">${escapeHtml(String(closing))}
-                <div class="rank-tooltip" style="display:none;">
-                  <div class="rank-year"><span class="year-label">2024:</span><span>${escapeHtml(String(r.closing_rank_2024 || 'N/A'))}</span></div>
-                  <div class="rank-year"><span class="year-label">2023:</span><span>${escapeHtml(String(r.closing_rank_2023 || 'N/A'))}</span></div>
-                  <div class="rank-year"><span class="year-label">2022:</span><span>${escapeHtml(String(r.closing_rank_2022 || 'N/A'))}</span></div>
-                </div>
-              </div>
-            </td>
-          </tr>
-        `;
+      // Add probability calculation function (moved here so renderRow/renderCard can use it)
+      function calculateProbability(userRank, result) {
+        const cutoffs = [
+          result.closing_rank_2024,
+          result.closing_rank_2023,
+          result.closing_rank_2022
+        ].filter(rank => rank && rank !== 'N/A' && !isNaN(Number(rank))).map(Number);
+
+        if (cutoffs.length === 0) return 'unknown';
+
+        let betterCount = 0;
+        let worseCount = 0;
+        cutoffs.forEach(cutoff => {
+          if (userRank && Number(userRank) < cutoff) betterCount++;
+          else worseCount++;
+        });
+
+        if (betterCount === cutoffs.length) return 'high';
+        if (worseCount === cutoffs.length) return 'low';
+        return 'medium';
       }
 
-      function renderCard(r, displayIndex) {
-        const opening = r.opening_rank_2024 || r.opening_rank || 'N/A';
-        const closing = r.closing_rank_2024 || r.closing_rank || 'N/A';
-        // S.No and name on the same line; name begins immediately after serial
-        return `
-          <div class="result-card">
-            <div class="line1"><span class="sno">${displayIndex}.</span><span class="name">${escapeHtml(r.college_name)}</span></div>
-            <div class="line2">${createBadge(r.institute_type)} <span>${escapeHtml(r.branch || '')}</span> <span>${escapeHtml(r.allotted_category || 'N/A')}</span></div>
-            <div class="line3">
-              <div class="rank-container">Round: ${escapeHtml(r.round || 'N/A')}</div>
-              <div class="rank-container opening"> <span class="rank-label mobile-only">OR:</span> ${escapeHtml(String(opening))}
-                <div class="rank-tooltip" style="display:none;">
-                  <div class="rank-year"><span class="year-label">2024:</span><span>${escapeHtml(String(r.opening_rank_2024 || 'N/A'))}</span></div>
-                  <div class="rank-year"><span class="year-label">2023:</span><span>${escapeHtml(String(r.opening_rank_2023 || 'N/A'))}</span></div>
-                  <div class="rank-year"><span class="year-label">2022:</span><span>${escapeHtml(String(r.opening_rank_2022 || 'N/A'))}</span></div>
-                </div>
-              </div>
-              <div class="rank-container closing"> <span class="rank-label mobile-only">CR:</span> ${escapeHtml(String(closing))}
-                <div class="rank-tooltip" style="display:none;">
-                  <div class="rank-year"><span class="year-label">2024:</span><span>${escapeHtml(String(r.closing_rank_2024 || 'N/A'))}</span></div>
-                  <div class="rank-year"><span class="year-label">2023:</span><span>${escapeHtml(String(r.closing_rank_2023 || 'N/A'))}</span></div>
-                  <div class="rank-year"><span class="year-label">2022:</span><span>${escapeHtml(String(r.closing_rank_2022 || 'N/A'))}</span></div>
-                </div>
-              </div>
-            </div>
+      // Mobile probability tooltip handler (delegated)
+      document.addEventListener('click', function(e) {
+        if (!(window.matchMedia && window.matchMedia('(max-width: 600px)').matches)) return;
+        const indicator = e.target.closest('.probability-indicator');
+        if (indicator) {
+          e.stopPropagation();
+          const tooltip = indicator.nextElementSibling;
+          if (tooltip && tooltip.classList.contains('probability-tooltip')) {
+            // Hide other tooltips
+            document.querySelectorAll('.probability-tooltip').forEach(t => { if (t !== tooltip) t.style.display = 'none'; });
+            tooltip.style.display = tooltip.style.display === 'block' ? 'none' : 'block';
+          }
+        } else {
+          // Hide all probability tooltips when clicking elsewhere on mobile
+          document.querySelectorAll('.probability-tooltip').forEach(t => { t.style.display = 'none'; });
+        }
+      });
+
+      function renderRow(r, idx) {
+  const opening = r.opening_rank_2024 || r.opening_rank || 'N/A';
+  const closing = r.closing_rank_2024 || r.closing_rank || 'N/A';
+  const userRank = <%= search && search.rank ? search.rank : 0 %>;
+  const probability = calculateProbability(userRank, r);
+  const probabilityClass = `probability-${probability}`;
+  
+  let tooltipText = '';
+  if (probability === 'high') {
+    tooltipText = 'High probability: Your rank is better than all historical cutoffs';
+  } else if (probability === 'medium') {
+    tooltipText = 'Medium probability: Mixed results compared to historical cutoffs';
+  } else if (probability === 'low') {
+    tooltipText = 'Low probability: Your rank does not meet the historical cutoffs';
+  } else {
+    tooltipText = 'Insufficient data to calculate probability';
+  }
+  
+  return `
+    <tr>
+      <td>${idx}</td>
+      <td class="college-name">${escapeHtml(r.college_name)}
+        <div class="probability-indicator ${probabilityClass}"></div>
+        <div class="probability-tooltip">${tooltipText}</div>
+      </td>
+      <td>${createBadge(r.institute_type)}</td>
+      <td>${escapeHtml(r.branch || '')}</td>
+      <td>${escapeHtml(r.allotted_category || 'N/A')}</td>
+      <td>${escapeHtml(r.round || 'N/A')}</td>
+      <td>
+        <div class="rank-container opening">${escapeHtml(String(opening))}
+          <div class="rank-tooltip" style="display:none;">
+            <div class="rank-year"><span class="year-label">2024:</span><span>${escapeHtml(String(r.opening_rank_2024 || 'N/A'))}</span></div>
+            <div class="rank-year"><span class="year-label">2023:</span><span>${escapeHtml(String(r.opening_rank_2023 || 'N/A'))}</span></div>
+            <div class="rank-year"><span class="year-label">2022:</span><span>${escapeHtml(String(r.opening_rank_2022 || 'N/A'))}</span></div>
           </div>
-        `;
-      }
+        </div>
+      </td>
+      <td>
+        <div class="rank-container closing">${escapeHtml(String(closing))}
+          <div class="rank-tooltip" style="display:none;">
+            <div class="rank-year"><span class="year-label">2024:</span><span>${escapeHtml(String(r.closing_rank_2024 || 'N/A'))}</span></div>
+            <div class="rank-year"><span class="year-label">2023:</span><span>${escapeHtml(String(r.closing_rank_2023 || 'N/A'))}</span></div>
+            <div class="rank-year"><span class="year-label">2022:</span><span>${escapeHtml(String(r.closing_rank_2022 || 'N/A'))}</span></div>
+          </div>
+        </div>
+      </td>
+    </tr>
+  `;
+}
+
+      function renderCard(r, displayIndex) {
+  const opening = r.opening_rank_2024 || r.opening_rank || 'N/A';
+  const closing = r.closing_rank_2024 || r.closing_rank || 'N/A';
+  const userRank = <%= search && search.rank ? search.rank : 0 %>;
+  const probability = calculateProbability(userRank, r);
+  const probabilityClass = `probability-${probability}`;
+  
+  let tooltipText = '';
+  if (probability === 'high') {
+    tooltipText = 'High probability: Your rank is better than all historical cutoffs';
+  } else if (probability === 'medium') {
+    tooltipText = 'Medium probability: Mixed results compared to historical cutoffs';
+  } else if (probability === 'low') {
+    tooltipText = 'Low probability: Your rank is worse than historical cutoffs';
+  } else {
+    tooltipText = 'Insufficient data to calculate probability';
+  }
+  
+  return `
+    <div class="result-card">
+      <div class="probability-indicator ${probabilityClass}"></div>
+      <div class="probability-tooltip">${tooltipText}</div>
+      <div class="line1"><span class="sno">${displayIndex}.</span><span class="name">${escapeHtml(r.college_name)}</span></div>
+      <div class="line2">${createBadge(r.institute_type)} <span>${escapeHtml(r.branch || '')}</span> <span>${escapeHtml(r.allotted_category || 'N/A')}</span></div>
+      <div class="line3">
+        <div class="rank-container">Round: ${escapeHtml(r.round || 'N/A')}</div>
+        <div class="rank-container opening"> <span class="rank-label mobile-only">OR:</span> ${escapeHtml(String(opening))}
+          <div class="rank-tooltip" style="display:none;">
+            <div class="rank-year"><span class="year-label">2024:</span><span>${escapeHtml(String(r.opening_rank_2024 || 'N/A'))}</span></div>
+            <div class="rank-year"><span class="year-label">2023:</span><span>${escapeHtml(String(r.opening_rank_2023 || 'N/A'))}</span></div>
+            <div class="rank-year"><span class="year-label">2022:</span><span>${escapeHtml(String(r.opening_rank_2022 || 'N/A'))}</span></div>
+          </div>
+        </div>
+        <div class="rank-container closing"> <span class="rank-label mobile-only">CR:</span> ${escapeHtml(String(closing))}
+          <div class="rank-tooltip" style="display:none;">
+            <div class="rank-year"><span class="year-label">2024:</span><span>${escapeHtml(String(r.closing_rank_2024 || 'N/A'))}</span></div>
+            <div class="rank-year"><span class="year-label">2023:</span><span>${escapeHtml(String(r.closing_rank_2023 || 'N/A'))}</span></div>
+            <div class="rank-year"><span class="year-label">2022:</span><span>${escapeHtml(String(r.closing_rank_2022 || 'N/A'))}</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
 
       function escapeHtml(str) {
         if (str === null || typeof str === 'undefined') return '';
@@ -1241,5 +1400,5 @@
       if (again) again.addEventListener('click', function(e) { e.preventDefault(); goBackPreserve(); });
     })();
   </script>
-</body>
-</html>
+  </body>
+  </html>
