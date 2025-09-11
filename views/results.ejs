@@ -884,6 +884,33 @@
   }
 
   /* ... rest of your existing CSS ... */
+
+  /* Increase probability strip width for desktop */
+@media (min-width: 1025px) {
+  .probability-indicator {
+    width: 9px !important;
+    border-radius: 4px 0 0 4px !important;
+  }
+  
+  /* Adjust table cell padding to accommodate wider strip */
+  .results-table tbody td:first-child {
+    padding-left: 28px !important;
+  }
+}
+
+/* Keep mobile size unchanged */
+@media (max-width: 1024px) {
+  .probability-indicator {
+    width: 7px;
+    border-radius: 3px 0 0 3px;
+  }
+  
+  .results-table tbody td:first-child {
+    padding-left: 26px !important;
+  }
+}
+
+
 </style>
 <body>
   <!-- Decorative Elements -->
