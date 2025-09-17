@@ -553,6 +553,8 @@ app.post('/payment/verify', ensureAuthenticated, async (req, res) => {
         
         const planKey = rows[0].plan_key;
         const planTurns = planKey === 'small' ? 5 : planKey === 'medium' ? 15 : 50;
+        // Determine lock state once; used throughout and in response
+        const wasLocked = effectiveTB === 0;
         const client = await pool.connect();
         let newTurns = 0;
         let turnsActuallyAdded = 0;
@@ -563,7 +565,6 @@ app.post('/payment/verify', ensureAuthenticated, async (req, res) => {
                 [req.user.id]
             );
             const currentTurns = userRows[0]?.paid_turns || 0;
-            const wasLocked = effectiveTB === 0;
             if (wasLocked) {
                 turnsActuallyAdded = planTurns - 1;
                 newTurns = currentTurns + turnsActuallyAdded;
