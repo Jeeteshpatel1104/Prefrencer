@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath d='M50 15 L80 45 L75 85 L25 85 L20 45 Z' fill='%234361ee'/%3E%3Ccircle cx='50' cy='45' r='14' fill='%2306d6a0'/%3E%3Ccircle cx='50' cy='70' r='8' fill='white'/%3E%3C/svg%3E" type="image/svg+xml">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
         :root {
             --primary: #4361ee;
@@ -57,6 +58,18 @@
         box-shadow: var(--shadow);
         padding: 8px;
     }
+    .turns-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 13px;
+        border: 1px solid var(--border);
+    }
+    .turns-pill.zero { color: #9ca3af; background: #f3f4f6; }
+    .turns-pill.positive { color: white; background: linear-gradient(to right, var(--primary), var(--primary-dark)); }
     .user-info {
       display: flex;
       align-items: center;
@@ -243,6 +256,10 @@
                     .hero-tag { font-size: 12px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
                     /* Slightly reduce container side padding so content has more room */
                     .container { padding-left: 8px; padding-right: 8px; }
+                  /* tighten spacing under header on mobile */
+                  .upgrade-header { margin-bottom: 8px; }
+                  .upgrade-header p { margin-bottom: 0; }
+
                 }
 
         @media (max-width: 480px) {
@@ -258,6 +275,8 @@
             .user-info { display: flex; align-items: center; gap: 8px; }
             .user-name { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45vw; }
             .logout-btn { padding: 6px 10px; font-size: 13px; }
+            /* Reduce submit button size on small screens */
+            .submit-btn { padding: 12px 30px; font-size: 16px; border-radius: 10px; }
         }
 
 
@@ -368,6 +387,8 @@
             
             .description-title {
                 font-size: 1.5rem;
+                    /* Further reduce submit button size on very small screens */
+                    .submit-btn { padding: 10px 20px; font-size: 15px; }
             }
             
             .description-item {
@@ -552,6 +573,494 @@
 }
         
 </style>
+
+<style>
+/* Upgrade Modal Styles - Compact Version */
+.upgrade-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 15px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.upgrade-modal.show {
+  display: flex;
+  opacity: 1;
+}
+
+.upgrade-modal-content {
+  background: white;
+  border-radius: 18px;
+  padding: 25px;
+  width: 100%;
+  max-width: 800px;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2);
+  position: relative;
+  transform: translateY(20px);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.upgrade-modal.show .upgrade-modal-content {
+  transform: translateY(0);
+}
+
+.upgrade-header {
+  text-align: center;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.upgrade-icon {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  border-radius: 50%;
+  color: white;
+  font-size: 26px;
+}
+
+.upgrade-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 8px;
+}
+
+.upgrade-header p {
+  color: var(--text-light);
+  font-size: 14px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.close-modal {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 22px;
+  color: var(--text-light);
+  transition: var(--transition);
+}
+
+.close-modal:hover {
+  background: #e2e8f0;
+  color: var(--dark);
+}
+
+.plans-container {
+  position: relative;
+  margin-bottom: 25px;
+}
+
+/* Desktop layout - 3 columns */
+.plans-carousel {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.plan-card {
+  background: white;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+  border: 1px solid var(--border);
+  position: relative;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+}
+
+.plan-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.plan-card.featured {
+  border: 2px solid var(--primary);
+  transform: scale(1.02);
+  z-index: 1;
+}
+
+.plan-card.featured:hover {
+  transform: scale(1.02) translateY(-3px);
+}
+
+.plan-popular-tag {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(to right, var(--secondary), #06b6d4);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.plan-header {
+  text-align: center;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border);
+}
+
+.plan-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--dark);
+  margin-bottom: 12px;
+}
+
+.plan-price {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+}
+
+.currency {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.amount {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--primary);
+  line-height: 1;
+}
+
+.save-tag {
+  background: rgba(6, 214, 160, 0.15);
+  color: #06a17e;
+  padding: 3px 6px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 6px;
+}
+
+.plan-features {
+  flex-grow: 1;
+  margin-bottom: 20px;
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.feature i {
+  color: var(--secondary);
+  font-size: 16px;
+  margin-right: 8px;
+}
+
+.plan-select-btn {
+  background: linear-gradient(to right, var(--primary), var(--primary-dark));
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-top: auto;
+}
+
+.plan-select-btn:hover {
+  background: linear-gradient(to right, var(--primary-dark), #2f44c0);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+}
+
+.featured-btn {
+  background: linear-gradient(to right, var(--secondary), #06b6d4);
+}
+
+.featured-btn:hover {
+  background: linear-gradient(to right, #06b6d4, #059bb4);
+}
+
+/* Carousel navigation dots - hidden on desktop */
+.carousel-dots {
+  display: none;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 10px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ddd;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.dot.active {
+  background: var(--primary);
+  transform: scale(1.2);
+}
+
+/* Carousel navigation arrows - hidden on desktop */
+.carousel-arrow {
+  display: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: white;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  z-index: 10;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: var(--primary);
+  transition: var(--transition);
+}
+
+.carousel-arrow:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.carousel-prev {
+  left: -20px;
+}
+
+.carousel-next {
+  right: -20px;
+}
+
+.upgrade-footer {
+  text-align: center;
+  padding-top: 15px;
+  border-top: 1px solid var(--border);
+}
+
+.upgrade-footer p {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-light);
+  font-size: 13px;
+}
+
+.upgrade-footer i {
+  color: var(--secondary);
+}
+
+/* Turns Pill Enhancement */
+.turns-pill {
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.turns-pill:hover {
+  transform: scale(1.05);
+}
+
+.turns-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 14px;
+  border: 1px solid var(--border);
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.turns-pill.zero { 
+  color: #9ca3af; 
+  background: #f3f4f6; 
+}
+
+.turns-pill.positive { 
+  color: white; 
+  background: linear-gradient(to right, var(--primary), var(--primary-dark));
+  box-shadow: 0 4px 12px rgba(67, 97, 238, 0.25);
+}
+
+.turns-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(67, 97, 238, 0.3);
+}
+
+.turns-label {
+  font-size: 12px;
+  opacity: 0.9;
+}
+@media (max-width: 768px) {
+  .turns-label {
+    display: none;
+  }
+}
+/* Mobile responsive styles - IMPROVED */
+@media (max-width: 900px) {
+  .upgrade-modal {
+    /* more top padding so floating badges have room and avoid touching viewport */
+    padding: 28px 10px 18px 10px;
+    align-items: flex-start;
+    overflow: visible !important; /* allow badges to overflow without being clipped */
+  }
+  
+  .upgrade-modal-content {
+    margin: auto;
+    max-width: 100%;
+    width: 100%;
+    transform: none;
+    padding: 20px 15px;
+    border-radius: 16px;
+    overflow: visible; /* allow floating badges to show */
+    z-index: 2100; /* be in front of overlay */
+  }
+  
+  .upgrade-modal.show .upgrade-modal-content {
+    transform: none;
+  }
+  
+  /* tighten spacing under header on mobile */
+  .upgrade-header { margin-bottom: 0px; }
+  .upgrade-header p { margin-bottom: 0; }
+  
+  .plans-carousel {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: visible; /* allow badges to overflow vertically without being clipped */
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding: 0 15px;
+  /* reduce top padding to bring carousel closer to subtitle, while keeping badge visible */
+  padding: 18px 0 10px;
+    margin: 0 -15px;
+    gap: 0;
+  }
+  
+  .plan-card {
+    flex: 0 0 85%;
+    scroll-snap-align: center;
+    margin: 0 7.5%;
+    opacity: 0.7;
+    transform: scale(0.95);
+    transition: all 0.3s ease;
+    overflow: visible; /* ensure badge isn't clipped */
+  }
+  
+  .plan-card.active {
+    opacity: 1;
+    transform: scale(1);
+  }
+  
+  .plan-card.featured {
+    transform: scale(0.97);
+  }
+  
+  .plan-card.featured.active {
+    transform: scale(1);
+  }
+  
+  /* Float the popular badge outside the card (on the boundary) and ensure it's visible */
+  .plans-container { overflow: visible; padding-top: 22px; }
+  .plan-card { padding-top: 24px; }
+  .plan-popular-tag { z-index: 99999; top: -14px; left: 50%; transform: translateX(-50%); box-shadow: 0 8px 18px rgba(0,0,0,0.14); }
+  /* Center the badge on mobile */
+  .plan-popular-tag { z-index: 99999; top: -22px; left: 50%; transform: translateX(-50%); box-shadow: 0 8px 18px rgba(0,0,0,0.14); }
+
+  /* Show carousel navigation on mobile */
+  .carousel-dots {
+    display: flex;
+    margin-top: 15px;
+  }
+  
+  .carousel-arrow {
+    display: none !important;
+  }
+  
+  .close-modal {
+    top: 5px;
+    right: 5px;
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .upgrade-modal-content {
+    padding: 18px 12px;
+  }
+  
+  .plan-card {
+    flex: 0 0 90%;
+    margin: 0 5%;
+    padding: 16px;
+  }
+  
+  .upgrade-header h2 {
+    font-size: 22px;
+    padding: 0 10px;
+  }
+  
+  .upgrade-header p {
+    padding: 0 5px;
+  }
+  
+  .amount {
+    font-size: 28px;
+  }
+
+  /* fine tune for very small screens: center badge, ensure spacing under it, and reduce top gap */
+  .plans-container { padding-top: 14px; }
+  .plan-popular-tag { top: -12px; left: 50%; transform: translateX(-50%); font-size: 12px; padding: 6px 14px; }
+  .plan-card { padding-top: 22px; }
+  /* slightly reduced top padding to minimize gap but keep badge visible */
+  .plans-carousel { padding-top: 16px; }
+}
+
+/* Prevent body scrolling when modal is open */
+body.modal-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
+</style>
+
 </head>
 <body>
     <!-- Decorative Elements -->
@@ -569,16 +1078,47 @@
                         <circle cx="50" cy="60" r="7" fill="white"/>
                     </svg>
       </div>
-      <div class="user-info">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <!-- Replace the turns-pill section in your header with this -->
+<div class="turns-pill <%= (user.paid_turns && user.paid_turns>0) ? 'positive' : 'zero' %>" id="turns-pill">
+  <i class='bx bx-coin-stack' style="font-size:16px;color:inherit"></i>
+  <span id="turns-count"><%= (user.paid_turns || 0) %></span>
+  <span class="turns-label">Turns</span>
+</div>
+                <% } %>
+                <div class="user-info">
         <% if (typeof user !== 'undefined' && user) { %>
-          <span class="user-name">Welcome, <%= user.name || user.displayName || user.email %></span>
+          <span class="user-name"><span class="user-realname"><%= user.name || user.displayName || user.email %></span></span>
           <a href="/logout" class="logout-btn"><i class='bx bx-log-out'></i> Logout</a>
         <% } else { %>
           <a href="/login" class="logout-btn"><i class='bx bx-log-in'></i> Login</a>
         <% } %>
-      </div>
+                </div>
+            </div>
     </div>
   </header>
+
+        <script>
+    // Initialize paid turns for header by querying server (authoritative). Do NOT use localStorage for the value.
+    window.__USER_PAID = <%= user && typeof user.paid_turns !== 'undefined' ? user.paid_turns : 0 %>;
+    (async function(){
+        try {
+            const resp = await fetch('/user/paid-turns', { method: 'GET', credentials: 'same-origin' });
+            if (resp.ok) {
+                const data = await resp.json();
+                const val = Number(data.paid_turns || 0);
+                window.__USER_PAID = val;
+                const pill = document.getElementById('turns-count');
+                if (pill) pill.textContent = val;
+                const parent = document.getElementById('turns-pill');
+                if (parent) { parent.classList.toggle('positive', val>0); parent.classList.toggle('zero', val<=0); }
+            }
+        } catch(e) {
+            console.warn('Unable to fetch paid turns from server, falling back to server-rendered value');
+        }
+    })();
+</script>
 
     <!-- Main Container -->
     <div class="container">
@@ -599,6 +1139,7 @@
             <div class="hero-tag">
                 <i class='bx bx-check-circle'></i> No Hidden Charges, 100% Free
             </div>
+            <!-- marketing line removed from index page; shown only inside upgrade modal -->
         </div>
 
         <!-- Form Container -->
@@ -769,7 +1310,7 @@
             <button type="submit" class="submit-btn">Search Colleges</button>
         </form>
 
-        <!-- Info Box -->
+    <!-- Info Box -->
         <div class="info-box">
             <i class='bx bx-info-circle info-icon'></i>
             <p class="info-text">Fill all the fields above to get personalized college recommendations based on your JEE Mains rank and preferences.</p>
@@ -1102,9 +1643,18 @@ function renderGroupOptions(groupKey, items) {
             cb.dispatchEvent(new Event('change'));
         });
 
+        // Persist user changes when they toggle a generated checkbox
+        cb.addEventListener('change', function() {
+            try { saveFilters(); } catch (e) { /* ignore if saveFilters not yet defined */ }
+        });
+
         row.appendChild(cb);
         row.appendChild(label);
         checkboxesContainer.appendChild(row);
+    });
+    // ensure select-all changes are also saved
+    selectAll.addEventListener('change', function() {
+        try { saveFilters(); } catch (e) { /* ignore */ }
     });
 }
 
@@ -1173,11 +1723,10 @@ function getChecked(groupKey) {
 }
 
 // Dynamic updates (Cities -> Colleges -> Branches), all using the unified renderer
-function updateCities() {
-    const selectedInstituteTypes = Array.from(document.querySelectorAll('input[name="institute_type"]:checked')).map(cb => cb.value);
-    if (selectedInstituteTypes.length === 0) return;
-
-    fetch('/update-cities', {
+function updateCities(instituteTypesOverride, savedCitiesOverride, savedCollegesOverride) {
+    const selectedInstituteTypes = Array.isArray(instituteTypesOverride) ? instituteTypesOverride : Array.from(document.querySelectorAll('input[name="institute_type"]:checked')).map(cb => cb.value);
+    if (selectedInstituteTypes.length === 0) return Promise.resolve();
+    return fetch('/update-cities', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ institute_types: selectedInstituteTypes })
@@ -1186,18 +1735,30 @@ function updateCities() {
     .then(data => {
         const items = (data.cities || []).slice().sort();
         renderGroupOptions('city', items);
+        // If caller provided savedCities, apply them now BEFORE wiring listeners (initMultiSelect attaches listeners)
+        if (Array.isArray(savedCitiesOverride) && savedCitiesOverride.length > 0) {
+            const cbInputs = Array.from(document.querySelectorAll('input[name="city[]"]'));
+            const desiredNorm = savedCitiesOverride.map(s => String(s || '').trim().toLowerCase());
+            cbInputs.forEach(cb => {
+                try { cb.checked = desiredNorm.indexOf(String(cb.value || '').trim().toLowerCase()) !== -1; } catch(e){}
+            });
+        }
         initMultiSelect('city');
-        updateColleges();
+        // return the downstream promise so callers can wait for full cascade; pass savedCitiesOverride and savedCollegesOverride so downstream lists are filtered
+        return updateColleges(savedCitiesOverride || null, selectedInstituteTypes, savedCollegesOverride || null);
     })
-    .catch(err => console.error('Error updating cities:', err));
+    .catch(err => {
+        console.error('Error updating cities:', err);
+        // resolve gracefully so callers don't hang
+        return Promise.resolve();
+    });
 }
 
-function updateColleges() {
-    const selectedInstituteTypes = Array.from(document.querySelectorAll('input[name="institute_type"]:checked')).map(cb => cb.value);
-    const selectedCities = getChecked('city');
-    if (selectedInstituteTypes.length === 0 || selectedCities.length === 0) return;
-
-    fetch('/update-colleges', {
+function updateColleges(citiesOverride, instituteTypesOverride, savedCollegesOverride) {
+    const selectedInstituteTypes = Array.isArray(instituteTypesOverride) ? instituteTypesOverride : Array.from(document.querySelectorAll('input[name="institute_type"]:checked')).map(cb => cb.value);
+    const selectedCities = Array.isArray(citiesOverride) ? citiesOverride : getChecked('city');
+    if (selectedInstituteTypes.length === 0 || selectedCities.length === 0) return Promise.resolve();
+    return fetch('/update-colleges', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ institute_types: selectedInstituteTypes, cities: selectedCities })
@@ -1206,17 +1767,27 @@ function updateColleges() {
     .then(data => {
         const items = (data.colleges || []).slice();
         renderGroupOptions('college_name', items);
+        // Apply saved colleges before wiring listeners
+        if (Array.isArray(savedCollegesOverride) && savedCollegesOverride.length > 0) {
+            const cbInputs = Array.from(document.querySelectorAll('input[name="college_name[]"]'));
+            const desiredNorm = savedCollegesOverride.map(s => String(s || '').trim().toLowerCase());
+            cbInputs.forEach(cb => {
+                try { cb.checked = desiredNorm.indexOf(String(cb.value || '').trim().toLowerCase()) !== -1; } catch(e){}
+            });
+        }
         initMultiSelect('college_name');
-        updateBranches();
+        return updateBranches(savedCollegesOverride || null);
     })
-    .catch(err => console.error('Error updating colleges:', err));
+    .catch(err => {
+        console.error('Error updating colleges:', err);
+        return Promise.resolve();
+    });
 }
 
-function updateBranches() {
-    const selectedColleges = getChecked('college_name');
-    if (selectedColleges.length === 0) return;
-
-    fetch('/update-branches', {
+function updateBranches(collegesOverride) {
+    const selectedColleges = Array.isArray(collegesOverride) ? collegesOverride : getChecked('college_name');
+    if (selectedColleges.length === 0) return Promise.resolve();
+    return fetch('/update-branches', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ colleges: selectedColleges })
@@ -1226,8 +1797,12 @@ function updateBranches() {
         const items = (data.branches || []).slice().sort();
         renderGroupOptions('branch', items);
         initMultiSelect('branch');
+        return Promise.resolve();
     })
-    .catch(err => console.error('Error updating branches:', err));
+    .catch(err => {
+        console.error('Error updating branches:', err);
+        return Promise.resolve();
+    });
 }
 
 // Initial render to normalize markup and behavior for all three groups
@@ -1375,37 +1950,101 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Persist and restore filters using localStorage so "Back to Search" and "Search Again" keep selections
         const FORM_KEY = 'pf_filters_v1';
+
+        // Save form data. Normalize keys by stripping trailing [] so checkbox groups like 'city[]'
+        // are stored under 'city' which makes restoration simpler.
         function saveFilters() {
             const form = document.querySelector('.form-container');
             const data = {};
             new FormData(form).forEach((v, k) => {
-                if (data[k]) {
-                    if (Array.isArray(data[k])) data[k].push(v); else data[k] = [data[k], v];
-                } else data[k] = v;
+                // normalize 'city[]' -> 'city'
+                const key = String(k).replace(/\[\]$/, '');
+                if (data[key]) {
+                    if (Array.isArray(data[key])) data[key].push(v); else data[key] = [data[key], v];
+                } else data[key] = v;
             });
             localStorage.setItem(FORM_KEY, JSON.stringify(data));
         }
 
-        function restoreFilters() {
+        async function restoreFilters() {
             const raw = localStorage.getItem(FORM_KEY);
             if (!raw) return;
             const data = JSON.parse(raw);
             const form = document.querySelector('.form-container');
+
+            // Apply non-dependent fields (including institute_type) first so dynamic lists are requested
             Object.keys(data).forEach(k => {
+                // defer advanced groups (support both normalized and bracketed keys)
+                if (k === 'city' || k === 'city[]' || k === 'college_name' || k === 'college_name[]' || k === 'branch' || k === 'branch[]') return;
                 const val = data[k];
                 const els = form.querySelectorAll(`[name="${k}"]`);
                 if (!els || els.length === 0) return;
-                if (els[0].type === 'checkbox') {
-                    // could be array
-                    const arr = Array.isArray(val) ? val : [val];
-                    els.forEach(el => {
-                        el.checked = arr.indexOf(el.value) !== -1;
-                        el.dispatchEvent(new Event('change'));
-                    });
-                } else if (els[0].tagName === 'SELECT' || els[0].type === 'text' || els[0].type === 'number') {
-                    els[0].value = Array.isArray(val) ? val[0] : val;
-                    els[0].dispatchEvent(new Event('change'));
-                }
+                try {
+                    if (els[0].type === 'checkbox') {
+                        const arr = Array.isArray(val) ? val : [val];
+                        els.forEach(el => {
+                            el.checked = arr.indexOf(el.value) !== -1;
+                            el.dispatchEvent(new Event('change'));
+                        });
+                    } else if (els[0].tagName === 'SELECT' || els[0].type === 'text' || els[0].type === 'number') {
+                        els[0].value = Array.isArray(val) ? val[0] : val;
+                        els[0].dispatchEvent(new Event('change'));
+                    }
+                } catch (e) { /* ignore */ }
+            });
+
+            // Trigger dynamic population (cities -> colleges -> branches) based on applied institute_type
+            try {
+                // If institute_type was saved, pass it through so server filtering happens deterministically.
+                const savedInstituteTypes = data['institute_type'] || data['institute_type[]'] || null;
+                const instituteTypesArr = savedInstituteTypes ? (Array.isArray(savedInstituteTypes) ? savedInstituteTypes : [savedInstituteTypes]) : null;
+                // Also thread saved cities/colleges so downstream fetches respect the user's saved selections
+                const savedCities = data['city'] || data['city[]'] || null;
+                const savedCitiesArr = savedCities ? (Array.isArray(savedCities) ? savedCities : [savedCities]) : null;
+                const savedColleges = data['college_name'] || data['college_name[]'] || null;
+                const savedCollegesArr = savedColleges ? (Array.isArray(savedColleges) ? savedColleges : [savedColleges]) : null;
+                await updateCities(instituteTypesArr, savedCitiesArr, savedCollegesArr);
+            } catch (e) { /* function may not yet be ready */ }
+
+            // Re-apply saved advanced selections when their checkbox inputs appear. Use short retry loop.
+            // Support both normalized keys ('city') and legacy bracketed keys ('city[]') for backward compatibility.
+            const advancedGroups = ['city', 'college_name', 'branch'];
+            advancedGroups.forEach(groupKey => {
+                const saved = data[groupKey] || data[`${groupKey}[]`];
+                if (!saved) return;
+                const desired = Array.isArray(saved) ? saved : [saved];
+
+                let attempts = 0;
+                const maxAttempts = 20; // allow slightly longer for slow networks
+                const interval = 150;
+                const tryApply = () => {
+                    attempts++;
+                    const checkboxes = Array.from(document.querySelectorAll(`input[name="${groupKey}[]"]`));
+                    if (checkboxes.length > 0) {
+                        // perform tolerant matching: trim + toLowerCase for saved vs DOM values
+                        const desiredNorm = desired.map(s => String(s || '').trim().toLowerCase());
+                        checkboxes.forEach(cb => {
+                            try {
+                                const valNorm = String(cb.value || '').trim().toLowerCase();
+                                const should = desiredNorm.indexOf(valNorm) !== -1;
+                                cb.checked = should;
+                            } catch (e) {}
+                        });
+                        // persist the restored choices
+                        try { saveFilters(); } catch (e) { /* ignore */ }
+                        // sync select-all checkbox if present WITHOUT firing its change handler (that would
+                        // override individual selections). Set the checked state directly.
+                        const selectAll = document.getElementById(`select_all_${groupKey}`);
+                        if (selectAll) {
+                            try {
+                                selectAll.checked = checkboxes.every(cb => cb.checked);
+                            } catch (e) { /* ignore */ }
+                        }
+                        return;
+                    }
+                    if (attempts < maxAttempts) setTimeout(tryApply, interval);
+                };
+                tryApply();
             });
         }
 
@@ -1414,8 +2053,9 @@ document.addEventListener('DOMContentLoaded', function() {
             el.addEventListener('change', saveFilters);
         });
 
-        // restore at load (if present)
-        restoreFilters();
+    // restore at load (if present)
+    // Because restoreFilters is async (waits for dynamic population), call and ignore errors
+    (async function(){ try { await restoreFilters(); } catch(e) { /* ignore */ } })();
 
         // Advanced filters toggle - simple direct handler
         (function() {
@@ -1500,5 +2140,473 @@ document.addEventListener('DOMContentLoaded', function() {
         });
                         
     </script>
+        <!-- Replace the entire upgrade modal section with this code -->
+<!-- Upgrade Modal -->
+<div id="upgrade-modal" class="upgrade-modal">
+  <div class="upgrade-modal-content">
+    <div class="upgrade-header">
+      <div class="upgrade-icon">
+        <i class='bx bx-crown'></i>
+      </div>
+      <h2>Unlock all results instantly</h2>
+      <p>Kickstart your career with the best college match — for less than a pizza!</p>
+      <button class="close-modal" id="upgrade-cancel">
+        <i class='bx bx-x'></i>
+      </button>
+    </div>
+    
+    <!-- Replace the entire plans-container section with this code -->
+<div class="plans-container">
+  <!-- Plans Carousel for Mobile -->
+  <div class="plans-carousel">
+    <div class="plan-card" data-plan="small">
+      <div class="plan-header">
+        <h3>Starter Pack</h3>
+        <div class="plan-price">
+          <span class="currency">₹</span>
+          <span class="amount">200</span>
+        </div>
+      </div>
+      <div class="plan-features">
+        <div class="feature">
+          <i class='bx bx-check-circle'></i>
+          <span>5 Search Turns</span>
+        </div>
+        <div class="feature">
+          <i class='bx bx-check-circle'></i>
+          <span>Priority Support</span>
+        </div>
+        <div class="feature">
+          <i class='bx bx-check-circle'></i>
+          <span>Personalized Recommendations</span>
+        </div>
+      </div>
+      <button class="plan-select-btn">Buy Starter — 5 turns</button>
+    </div>
+    
+    <div class="plan-card featured" data-plan="medium">
+      <div class="plan-popular-tag">Most Popular</div>
+      <div class="plan-header">
+        <h3>Pro Pack</h3>
+        <div class="plan-price">
+          <span class="currency">₹</span>
+          <span class="amount">500</span>
+          <span class="save-tag">Save 17%</span>
+        </div>
+      </div>
+      <div class="plan-features">
+        <div class="feature">
+          <i class='bx bx-check-circle'></i>
+          <span>15 Search Turns</span>
+        </div>
+        <div class="feature">
+          <i class='bx bx-check-circle'></i>
+          <span>Priority Support</span>
+        </div>
+        <div class="feature">
+          <i class='bx bx-check-circle'></i>
+          <span>Personalized Recommendations</span>
+        </div>
+      </div>
+      <button class="plan-select-btn featured-btn">Buy Pro — 15 turns</button>
+    </div>
+    
+    <div class="plan-card" data-plan="large">
+      <div class="plan-header">
+        <h3>Max Pack</h3>
+        <div class="plan-price">
+          <span class="currency">₹</span>
+          <span class="amount">1000</span>
+          <span class="save-tag">Save 50%</span>
+        </div>
+      </div>
+      <div class="plan-features">
+        <div class="feature">
+          <i class='bx bx-check-circle'></i>
+          <span>50 Search Turns</span>
+        </div>
+        <div class="feature">
+          <i class='bx bx-check-circle'></i>
+          <span>Priority Support</span>
+        </div>
+        <div class="feature">
+          <i class='bx bx-check-circle'></i>
+          <span>Personalized Recommendations</span>
+        </div>
+      </div>
+      <button class="plan-select-btn">Buy Max — 50 turns</button>
+    </div>
+  </div>
+  
+  <!-- Carousel Navigation Dots -->
+  <div class="carousel-dots">
+    <span class="dot active" data-index="0"></span>
+    <span class="dot" data-index="1"></span>
+    <span class="dot" data-index="2"></span>
+  </div>
+  
+  <!-- Carousel Navigation Arrows (for desktop) -->
+  <button class="carousel-arrow carousel-prev">
+    <i class='bx bx-chevron-left'></i>
+  </button>
+  <button class="carousel-arrow carousel-next">
+    <i class='bx bx-chevron-right'></i>
+  </button>
+</div>
+    
+    <div class="upgrade-footer">
+      <p><i class='bx bx-shield-quarter'></i> All payments are secure and encrypted</p>
+    </div>
+  </div>
+</div>
+
+<script>
+
+   // Upgrade modal logic and Razorpay checkout integration
+(function(){
+  const upgradeModal = document.getElementById('upgrade-modal');
+  const turnsPill = document.getElementById('turns-pill');
+  
+  function openModal(){ 
+    upgradeModal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+    // Ensure Pro Pack (middle card) is visible first on mobile
+    try {
+      if (window.matchMedia && window.matchMedia('(max-width: 900px)').matches && window.setPlanIndex) {
+        // Wait a tick for layout so measurements are correct, then jump to Pro
+        requestAnimationFrame(() => setTimeout(() => window.setPlanIndex(1), 60));
+      }
+    } catch(e) {}
+  }
+  
+  function closeModal(){ 
+    upgradeModal.classList.remove('show');
+    document.body.style.overflow = 'auto';
+  }
+  
+  // Open modal when clicking turns pill
+  if (turnsPill) turnsPill.addEventListener('click', openModal);
+  
+  // Close modal when clicking close button
+  document.getElementById('upgrade-cancel').addEventListener('click', closeModal);
+  
+  // Close modal when clicking outside content
+  upgradeModal.addEventListener('click', function(e) {
+    if (e.target === upgradeModal) closeModal();
+  });
+  
+  // Refresh authoritative turns from server when modal opens
+  async function refreshTurns() {
+    try {
+      const r = await fetch('/user/paid-turns', { method:'GET', credentials:'same-origin' });
+      if (r.ok) {
+        const d = await r.json();
+        const val = Number(d.paid_turns || 0);
+        window.__USER_PAID = val;
+        const pill = document.getElementById('turns-count'); 
+        if (pill) pill.textContent = val;
+        const parent = document.getElementById('turns-pill'); 
+        if (parent) { 
+          parent.classList.toggle('positive', val>0); 
+          parent.classList.toggle('zero', val<=0); 
+        }
+      }
+    } catch(e) {}
+  }
+  
+  // Handle plan selection
+  document.querySelectorAll('.plan-select-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+      const planCard = this.closest('.plan-card');
+      const plan = planCard.dataset.plan;
+      
+      try {
+        const resp = await fetch('/payment/create-order', { 
+          method: 'POST', 
+          headers: { 'Content-Type':'application/json' }, 
+          body: JSON.stringify({ plan }) 
+        });
+        
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.error || 'Order creation failed');
+        
+        // Open Razorpay checkout
+        const options = {
+          key: data.key_id,
+          amount: data.order.amount,
+          currency: data.order.currency,
+          name: 'College Preferencer',
+          description: data.planLabel,
+          order_id: data.order.id,
+          handler: async function(response){
+            // Verify on server
+            const verifyResp = await fetch('/payment/verify', { 
+              method: 'POST', 
+              headers: { 'Content-Type':'application/json' }, 
+              body: JSON.stringify(response) 
+            });
+            
+            const verifyData = await verifyResp.json();
+            if (verifyData.success) {
+              // Show success message with animation
+              const planCard = document.querySelector(`.plan-card[data-plan="${plan}"]`);
+              if (planCard) {
+                planCard.style.animation = 'pulse 0.5s';
+                setTimeout(() => {
+                  planCard.style.animation = '';
+                }, 500);
+              }
+              
+              // Update turns count
+              refreshTurns();
+              
+              // Show success notification
+              showNotification(`Purchase successful! ${verifyData.turnsAdded} turns added to your account.`, 'success');
+              
+              setTimeout(() => {
+                closeModal();
+              }, 1500);
+            } else {
+              showNotification('Payment verification failed. Please try again.', 'error');
+            }
+          },
+          modal: { 
+            ondismiss: function() {
+              showNotification('Payment cancelled', 'info');
+            } 
+          },
+          theme: {
+            color: '#4361ee'
+          }
+        };
+        
+        const rzp = new Razorpay(options);
+        rzp.open();
+      } catch (err) {
+        console.error(err);
+        showNotification('Unable to start payment. Please try again.', 'error');
+      }
+    });
+  });
+  
+  // Helper function to show notifications
+  function showNotification(message, type = 'info') {
+    // Remove any existing notifications
+    const existingNotification = document.querySelector('.notification');
+    if (existingNotification) {
+      existingNotification.remove();
+    }
+    
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+      <div class="notification-content">
+        <i class='bx ${type === 'success' ? 'bx-check-circle' : type === 'error' ? 'bx-error-circle' : 'bx-info-circle'}'></i>
+        <span>${message}</span>
+      </div>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Show notification
+    setTimeout(() => {
+      notification.classList.add('show');
+    }, 10);
+    
+    // Hide after 3 seconds
+    setTimeout(() => {
+      notification.classList.remove('show');
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 300);
+    }, 3000);
+  }
+  
+  // Add CSS for notifications
+  const notificationStyles = document.createElement('style');
+  notificationStyles.textContent = `
+    .notification {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: white;
+      border-radius: 8px;
+      padding: 15px 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      z-index: 3000;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+    
+    .notification.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    .notification-success {
+      border-left: 4px solid var(--secondary);
+    }
+    
+    .notification-error {
+      border-left: 4px solid var(--accent);
+    }
+    
+    .notification-info {
+      border-left: 4px solid var(--primary);
+    }
+    
+    .notification-content {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .notification-content i {
+      font-size: 20px;
+    }
+    
+    .notification-success i {
+      color: var(--secondary);
+    }
+    
+    .notification-error i {
+      color: var(--accent);
+    }
+    
+    .notification-info i {
+      color: var(--primary);
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+      100% { transform: scale(1); }
+    }
+  `;
+  
+  document.head.appendChild(notificationStyles);
+})();
+
+
+
+// Carousel functionality for mobile plans
+(function() {
+  const carousel = document.querySelector('.plans-carousel');
+  const dots = document.querySelectorAll('.dot');
+  const prevBtn = document.querySelector('.carousel-prev');
+  const nextBtn = document.querySelector('.carousel-next');
+  const planCards = document.querySelectorAll('.plan-card');
+  
+  if (!carousel) return;
+  
+  // Default to Pro Pack (middle card) on mobile
+  let currentIndex = (window.matchMedia && window.matchMedia('(max-width: 900px)').matches) ? 1 : 0;
+  
+  // Function to update carousel position
+  function updateCarousel() {
+    const cardWidth = planCards[0].offsetWidth + 30; // width + margin
+    carousel.scrollTo({
+      left: currentIndex * cardWidth,
+      behavior: 'smooth'
+    });
+
+  // Expose a helper so other scripts (modal open) can force the active plan
+  window.setPlanIndex = function(i) {
+    if (!planCards || !planCards.length) return;
+    currentIndex = Math.max(0, Math.min(planCards.length - 1, i));
+    // Prefer snapping the desired card into view, then update active states
+    try {
+      const card = planCards[currentIndex];
+      if (card && card.scrollIntoView) {
+        card.scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
+      }
+    } catch(e) {}
+    updateCarousel();
+  };
+    
+    // Update active dot
+    dots.forEach((dot, index) => {
+      dot.classList.toggle('active', index === currentIndex);
+    });
+    
+    // Update active card
+    planCards.forEach((card, index) => {
+      card.classList.toggle('active', index === currentIndex);
+    });
+  }
+  
+  // Next button click
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      currentIndex = (currentIndex + 1) % planCards.length;
+      updateCarousel();
+    });
+  }
+  
+  // Previous button click
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      currentIndex = (currentIndex - 1 + planCards.length) % planCards.length;
+      updateCarousel();
+    });
+  }
+  
+  // Dot navigation
+  dots.forEach(dot => {
+    dot.addEventListener('click', () => {
+      currentIndex = parseInt(dot.dataset.index);
+      updateCarousel();
+    });
+  });
+  
+  // Swipe handling for touch devices
+  let touchStartX = 0;
+  let touchEndX = 0;
+  
+  carousel.addEventListener('touchstart', e => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, false);
+  
+  carousel.addEventListener('touchend', e => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+  }, false);
+  
+  function handleSwipe() {
+    const swipeThreshold = 50;
+    
+    if (touchEndX < touchStartX - swipeThreshold) {
+      // Swipe left - go to next
+      currentIndex = (currentIndex + 1) % planCards.length;
+      updateCarousel();
+    }
+    
+    if (touchEndX > touchStartX + swipeThreshold) {
+      // Swipe right - go to previous
+      currentIndex = (currentIndex - 1 + planCards.length) % planCards.length;
+      updateCarousel();
+    }
+  }
+  
+  // Initialize carousel (ensure correct default active card)
+  updateCarousel();
+  
+  // Adjust for window resize
+  window.addEventListener('resize', updateCarousel);
+})();
+
+</script>
+
 </body>
 </html>
+
+
+
+

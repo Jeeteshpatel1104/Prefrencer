@@ -23,6 +23,7 @@
     "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
     "pg": "^8.16.3",
-    "python-shell": "^5.0.0"
+    "python-shell": "^5.0.0",
+    "razorpay": "^2.9.6"
   }
 }

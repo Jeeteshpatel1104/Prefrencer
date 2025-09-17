@@ -34,6 +34,15 @@ const pool = new Pool({
     ssl: { rejectUnauthorized: false }
 });
 
+const Razorpay = require('razorpay');
+const crypto = require('crypto');
+
+// Razorpay client (use env vars)
+const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID || '',
+    key_secret: process.env.RAZORPAY_KEY_SECRET || ''
+});
+
 pool.connect()
     .then(() => console.log('✅ Connected to PostgreSQL database'))
     .catch(err => console.error('❌ Database connection error:', err));
@@ -42,7 +51,7 @@ pool.connect()
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL:'https://collegepreferencer.com/auth/google/callback' 
+    callbackURL:'http://localhost:3000/auth/google/callback' 
     // callbackURL:'https://prefrencer.onrender.com/auth/google/callback'
     // http://localhost:3000/auth/google/callback
 }, async (accessToken, refreshToken, profile, done) => {
@@ -87,6 +96,18 @@ passport.deserializeUser(async (id, done) => {
 function ensureAuthenticated(req, res, next) {
     req.isAuthenticated() ? next() : res.redirect('/login');
 }
+
+// API: return current user's paid turns (authoritative)
+app.get('/user/paid-turns', ensureAuthenticated, async (req, res) => {
+    try {
+        const { rows } = await pool.query('SELECT paid_turns FROM users WHERE id = $1', [req.user.id]);
+        const paid_turns = (rows[0] && typeof rows[0].paid_turns !== 'undefined') ? Number(rows[0].paid_turns) : 0;
+        res.json({ paid_turns });
+    } catch (err) {
+        console.error('Error fetching paid turns:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
 // Routes
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
@@ -322,7 +343,7 @@ if (!Array.isArray(categories)) {
             categories
         ];
 
-        const { rows: results } = await pool.query(query, values);
+    const { rows: results } = await pool.query(query, values);
         
         // Process results (same as your original code)
         const uniqueResults = {};
@@ -334,6 +355,46 @@ if (!Array.isArray(categories)) {
         });
 
         const finalResults = Object.values(uniqueResults);
+
+        // Handle paid turns: do not decrement if there are zero results
+        // Store turns BEFORE any decrement
+// Store paid turns BEFORE any decrement
+let turnsBeforeSearch = req.user.paid_turns;
+let paidSearchConsumed = false;
+
+if (finalResults.length > 0) {
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        const { rows: userRows } = await client.query('SELECT paid_turns FROM users WHERE id = $1 FOR UPDATE', [req.user.id]);
+        let paidTurns = (userRows[0] && userRows[0].paid_turns) || 0;
+        // Store turnsBeforeSearch BEFORE any decrement
+        turnsBeforeSearch = paidTurns;
+        if (paidTurns > 0) {
+            // decrement atomically
+            await client.query('UPDATE users SET paid_turns = GREATEST(paid_turns - 1, 0) WHERE id = $1', [req.user.id]);
+            paidTurns = paidTurns - 1;
+            paidSearchConsumed = true;
+            // reflect in req.user for rendering
+            req.user.paid_turns = paidTurns;
+        }
+        await client.query('COMMIT');
+    } catch (txnErr) {
+        await client.query('ROLLBACK');
+        console.error('Paid-turns transaction error:', txnErr);
+    } finally {
+        client.release();
+    }
+}
+
+// Store the actual turns BEFORE search (crucial for display logic)
+req.session.searchPayload = {
+    results: finalResults,
+    search: { rank, selectedCaste, domicile, rankRange, sortBy },
+    paidSearchConsumed,
+    turnsBeforeSearch
+};
+
 
         // Historical data processing
         const historicalQuery = `
@@ -390,16 +451,156 @@ if (!Array.isArray(categories)) {
             return 0;
         });
 
-        res.render('results', { 
+        // Store the computed results and related metadata in session and redirect (PRG pattern)
+        // This prevents the browser from re-submitting the POST on refresh and avoids duplicate turn consumption.
+        req.session.searchPayload = {
             results: finalResults,
-            user: req.user || null,
-            search: { rank, selectedCaste, domicile, rankRange, sortBy }
-        });
+            search: { rank, selectedCaste, domicile, rankRange, sortBy },
+            paidSearchConsumed,
+            turnsBeforeSearch
+        };
+        return res.redirect('/results');
     } catch (err) {
         console.error('Search error:', err);
         res.status(500).send('Internal Server Error');
     }
 });
+
+// Results page (GET) - reads search payload from session and renders results without re-running the search
+app.get('/results', ensureAuthenticated, async (req, res) => {
+    try {
+        const payload = req.session && req.session.searchPayload;
+        if (!payload) {
+            // No search in session; redirect to homepage
+            return res.redirect('/');
+        }
+
+        // Render results using the stored payload. Do NOT re-run the search logic here — that would re-consume turns.
+        return res.render('results', {
+            results: payload.results || [],
+            user: req.user || null,
+            search: payload.search || {},
+            paidSearchConsumed: payload.paidSearchConsumed || false,
+            turnsBeforeSearch: payload.turnsBeforeSearch || 0
+        });
+    } catch (err) {
+        console.error('Results GET error:', err);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+// Create Razorpay order
+app.post('/payment/create-order', ensureAuthenticated, async (req, res) => {
+    try {
+        const { plan } = req.body; // 'small' | 'medium' | 'large'
+        const plans = {
+            small: { amount: 20000, turns: 5, label: '₹200 — 5 turns' },
+            medium: { amount: 50000, turns: 15, label: '₹500 — 15 turns' },
+            large: { amount: 100000, turns: 50, label: '₹1000 — 50 turns' }
+        };
+        if (!plans[plan]) return res.status(400).json({ error: 'Invalid plan' });
+
+        const orderOptions = {
+            amount: plans[plan].amount, // in paise
+            currency: 'INR',
+            receipt: `rcpt_${Date.now()}_${req.user.id}`,
+            payment_capture: 1
+        };
+
+        const order = await razorpay.orders.create(orderOptions);
+        // store mapping receipt -> plan turns in payments table
+        await pool.query('INSERT INTO payments(receipt_id, user_id, plan_key, amount, order_id, status) VALUES($1,$2,$3,$4,$5,$6)', [order.receipt, req.user.id, plan, order.amount, order.id, 'CREATED']);
+        // persist turnsBeforeSearch in session for robust server-side use during verify
+        try {
+            const tb = (req.session && req.session.searchPayload && typeof req.session.searchPayload.turnsBeforeSearch !== 'undefined') ? req.session.searchPayload.turnsBeforeSearch : (typeof req.body.turnsBeforeSearch !== 'undefined' ? req.body.turnsBeforeSearch : 0);
+            if (!req.session.pendingPayments) req.session.pendingPayments = {};
+            req.session.pendingPayments[order.receipt] = Number(tb);
+        } catch (e) {}
+        res.json({ order, planKey: plan, planLabel: plans[plan].label, turns: plans[plan].turns, key_id: process.env.RAZORPAY_KEY_ID || '' });
+    } catch (err) {
+        console.error('Create order error:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Verify payment
+// Verify payment
+// Verify payment
+// Verify payment - SIMPLIFIED VERSION
+// ...existing code...
+app.post('/payment/verify', ensureAuthenticated, async (req, res) => {
+    try {
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature, turnsBeforeSearch } = req.body;
+        
+        // Verify signature
+        const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || '');
+        hmac.update(razorpay_order_id + '|' + razorpay_payment_id);
+        const generated_signature = hmac.digest('hex');
+
+        if (generated_signature !== razorpay_signature) {
+            return res.status(400).json({ error: 'Invalid signature' });
+        }
+
+        // Get payment details
+        const { rows } = await pool.query('SELECT * FROM payments WHERE order_id = $1', [razorpay_order_id]);
+        if (!rows[0]) return res.status(400).json({ error: 'Order not found' });
+        const receiptId = rows[0].receipt_id;
+        // prefer session-captured turnsBeforeSearch associated with the receipt; fallback to client-provided value
+        const tbFromSession = (req.session && req.session.pendingPayments && typeof req.session.pendingPayments[receiptId] !== 'undefined')
+            ? Number(req.session.pendingPayments[receiptId])
+            : (typeof turnsBeforeSearch !== 'undefined' ? Number(turnsBeforeSearch) : undefined);
+        const effectiveTB = (typeof tbFromSession === 'number' && !Number.isNaN(tbFromSession)) ? tbFromSession : 0;
+        
+        const planKey = rows[0].plan_key;
+        const planTurns = planKey === 'small' ? 5 : planKey === 'medium' ? 15 : 50;
+        const client = await pool.connect();
+        let newTurns = 0;
+        let turnsActuallyAdded = 0;
+        try {
+            await client.query('BEGIN');
+            const { rows: userRows } = await client.query(
+                'SELECT paid_turns FROM users WHERE id = $1 FOR UPDATE', 
+                [req.user.id]
+            );
+            const currentTurns = userRows[0]?.paid_turns || 0;
+            const wasLocked = effectiveTB === 0;
+            if (wasLocked) {
+                turnsActuallyAdded = planTurns - 1;
+                newTurns = currentTurns + turnsActuallyAdded;
+            } else {
+                turnsActuallyAdded = planTurns;
+                newTurns = currentTurns + turnsActuallyAdded;
+            }
+            await client.query(
+                'UPDATE users SET paid_turns = $1 WHERE id = $2',
+                [newTurns, req.user.id]
+            );
+            await client.query(
+                'UPDATE payments SET status = $1, payment_id = $2 WHERE order_id = $3',
+                ['PAID', razorpay_payment_id, razorpay_order_id]
+            );
+            await client.query('COMMIT');
+        } catch (txnErr) {
+            await client.query('ROLLBACK');
+            throw txnErr;
+        } finally {
+            client.release();
+        }
+        // reflect new turns in session user and cleanup session pending mapping
+        try { req.user.paid_turns = newTurns; } catch(e) {}
+        try { if (req.session && req.session.pendingPayments && receiptId) { delete req.session.pendingPayments[receiptId]; } } catch(e) {}
+        res.json({ 
+            success: true, 
+            newTurns: newTurns,
+            wasLocked: wasLocked,
+            turnsAdded: turnsActuallyAdded
+        });
+    } catch (err) {
+        console.error('Payment verify error:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+// ...existing code...
 
 // Start server
 app.listen(port, () => {
@@ -409,3 +610,4 @@ app.listen(port, () => {
     console.log(`\n🌐 Open in browser: http://localhost:${port}/`);
     console.log(`🚨 Press Ctrl+C to stop the server\n`);
 });
+
