@@ -931,6 +931,18 @@
     display: none;
   }
 }
+/* Mobile size adjustments for turns pill to match results page */
+@media (max-width:600px) {
+  .turns-pill {
+    padding: 4px 10px;
+    font-size: 12px; /* down from 14px */
+    gap: 4px;
+    position: relative; top: 1px; /* nudge down to align with user name */
+  }
+  .turns-pill .bx, .turns-pill i {
+    font-size: 16px; /* slightly smaller icon */
+  }
+}
 /* Mobile responsive styles - IMPROVED */
 @media (max-width: 900px) {
   .upgrade-modal {
@@ -1223,8 +1235,8 @@ body.modal-open {
                         <a href="#sortby-desc" class="info-anchor"><i class='bx bx-info-circle'></i></a>
                     </label>
                     <select id="sort_by" name="sort_by" class="form-select">
-                        <option value="lastYearTrend">Last Year Trend</option>
-                        <option value="closing_rank">Closing Rank</option>
+                        <option value="lastYearTrend">5-Year Average Trend</option>
+                        <option value="closing_rank">Last Year Trend</option>
                         <option value="opening_rank">Opening Rank</option>
                     </select>
                 </div>
@@ -1337,7 +1349,7 @@ body.modal-open {
                 
                 <div class="description-item" id="sortby-desc">
                     <h3><i class='bx bx-sort'></i> Sort By</h3>
-                    <p>Organize your results based on different criteria: "Last Year Trend" shows colleges with similar historical admission patterns, "Closing Rank" sorts by the highest rank admitted last year, and "Opening Rank" sorts by the lowest rank admitted.</p>
+                    <p>Organize your results based on different criteria. The 5-Year Average Trend analyzes cutoffs from the past five years and displays results according to the average closing rank, giving a more stable picture of admission patterns. The Last Year Trend focuses only on the closing rank from the most recent year, highlighting the latest admission scenario. Meanwhile, the Opening Rank shows results based on the lowest rank admitted in the most recent year, helping you understand the earliest admissions cutoffs.</p>
                 </div>
             </div>
         </div>
@@ -2324,7 +2336,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const resp = await fetch('/payment/create-order', { 
           method: 'POST', 
           headers: { 'Content-Type':'application/json' }, 
-          body: JSON.stringify({ plan }) 
+          body: JSON.stringify({ plan, origin: 'index' }) 
         });
         
         const data = await resp.json();
@@ -2606,6 +2618,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 </body>
 </html>
+
+
 
 
 

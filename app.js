@@ -6,6 +6,7 @@ const session = require('express-session');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
+
 const app = express();
 const port = process.env.PORT || 3000;
 app.set('trust proxy', 1);
@@ -16,6 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+
 // Session
 app.use(session({
     secret: process.env.SESSION_SECRET,
@@ -24,9 +26,11 @@ app.use(session({
     cookie: { secure: process.env.NODE_ENV === 'production' }
 }));
 
+
 // Passport
 app.use(passport.initialize());
 app.use(passport.session());
+
 
 // PostgreSQL Connection
 const pool = new Pool({
@@ -34,8 +38,10 @@ const pool = new Pool({
     ssl: { rejectUnauthorized: false }
 });
 
+
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
+
 
 // Razorpay client (use env vars)
 const razorpay = new Razorpay({
@@ -43,24 +49,28 @@ const razorpay = new Razorpay({
     key_secret: process.env.RAZORPAY_KEY_SECRET || ''
 });
 
+
 pool.connect()
     .then(() => console.log('✅ Connected to PostgreSQL database'))
     .catch(err => console.error('❌ Database connection error:', err));
+
 
 // Passport Configuration
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL:'https://collegepreferencer.com/auth/google/callback' 
+    callbackURL:'https://collegepreferencer.com/auth/google/callback'
     // callbackURL:'https://prefrencer.onrender.com/auth/google/callback'
     // http://localhost:3000/auth/google/callback
+    // callbackURL:'https://collegepreferencer.com/auth/google/callback' 
+    
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         const { rows: existingUser } = await pool.query(
             'SELECT * FROM users WHERE google_id = $1 OR email = $2',
             [profile.id, profile.emails[0].value]
         );
-        
+       
         if (existingUser.length > 0) {
             if (!existingUser[0].google_id) {
                 await pool.query(
@@ -81,6 +91,7 @@ passport.use(new GoogleStrategy({
     }
 }));
 
+
 // Serialization
 passport.serializeUser((user, done) => done(null, user.id));
 passport.deserializeUser(async (id, done) => {
@@ -92,10 +103,12 @@ passport.deserializeUser(async (id, done) => {
     }
 });
 
+
 // Middleware
 function ensureAuthenticated(req, res, next) {
     req.isAuthenticated() ? next() : res.redirect('/login');
 }
+
 
 // API: return current user's paid turns (authoritative)
 app.get('/user/paid-turns', ensureAuthenticated, async (req, res) => {
@@ -109,6 +122,7 @@ app.get('/user/paid-turns', ensureAuthenticated, async (req, res) => {
     }
 });
 
+
 // Routes
 app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/login' }), (req, res) => {
@@ -120,11 +134,13 @@ app.get('/complete-profile', ensureAuthenticated, (req, res) => {
     req.user.mobile ? res.redirect('/') : res.render('complete-profile', { user: req.user });
 });
 
+
 app.get('/terms-and-conditions', (req, res) => {
-    res.render('terms-and-conditions', { 
-        user: req.user || null 
+    res.render('terms-and-conditions', {
+        user: req.user || null
     });
 });
+
 
 app.post('/complete-profile', ensureAuthenticated, async (req, res) => {
     try {
@@ -137,31 +153,33 @@ app.post('/complete-profile', ensureAuthenticated, async (req, res) => {
     }
 });
 
+
 // Helper Function (Unchanged)
 function generateCategories(selectedCaste, selectedClass, selectedGender) {
     const categories = [];
     const specialCastes = ['EWS', 'JKM', 'JKR', 'NTPC'];
-    
+   
     if (specialCastes.includes(selectedCaste)) {
         categories.push(selectedCaste, 'UR/X/OP');
         return categories;
     }
-    
+   
     if (selectedCaste === 'FW') {
         categories.push('FW/OP', 'UR/X/OP');
         return categories;
     }
-    
+   
     const castes = selectedCaste !== 'UR' ? [selectedCaste, 'UR'] : ['UR'];
     const classes = selectedClass !== 'X' ? [selectedClass, 'X'] : ['X'];
     const genders = selectedGender !== 'OP' ? [selectedGender, 'OP'] : ['OP'];
-    
+   
     castes.forEach(caste => classes.forEach(classType => genders.forEach(gender => {
         categories.push(`${caste}/${classType}/${gender}`);
     })));
-    
+   
     return categories;
 }
+
 
 // Main Route (Fixed for template compatibility)
 app.get('/', ensureAuthenticated, async (req, res) => {
@@ -174,11 +192,12 @@ app.get('/', ensureAuthenticated, async (req, res) => {
             branches
         ] = await Promise.all([
             pool.query('SELECT DISTINCT institute_type FROM data_table'),
-            pool.query('SELECT DISTINCT city FROM data_table WHERE year = 2024'),
-            pool.query('SELECT DISTINCT college_name FROM data_table WHERE year = 2024 ORDER BY college_name ASC'),
+            pool.query('SELECT DISTINCT city FROM data_table WHERE year = 2025'),
+            pool.query('SELECT DISTINCT college_name FROM data_table WHERE year = 2025 ORDER BY college_name ASC'),
             pool.query('SELECT DISTINCT year FROM data_table'),
-            pool.query('SELECT DISTINCT branch FROM data_table WHERE year = 2024')
+            pool.query('SELECT DISTINCT branch FROM data_table WHERE year = 2025')
         ]);
+
 
         // KEY FIX: Maintain object structure for branches
         res.render('index', {
@@ -199,18 +218,21 @@ app.get('/', ensureAuthenticated, async (req, res) => {
 });
 
 
+
+
  function ensureArray(val) {
     if (Array.isArray(val)) return val;
     if (val === undefined || val === null) return [];
     return [val];
 }
 
+
 // AJAX Routes (Maintain object structure for consistency)
 app.post('/update-cities', async (req, res) => {
     try {
         const instituteTypes = ensureArray(req.body.institute_types);
         const { rows } = await pool.query(
-            'SELECT DISTINCT city FROM data_table WHERE institute_type = ANY($1) AND year = 2024',
+            'SELECT DISTINCT city FROM data_table WHERE institute_type = ANY($1) AND year = 2025',
             [instituteTypes]
         );
         res.json({ cities: rows.map(row => row.city).sort() });
@@ -220,15 +242,16 @@ app.post('/update-cities', async (req, res) => {
     }
 });
 
+
 app.post('/update-colleges', async (req, res) => {
     try {
         const instituteTypes = ensureArray(req.body.institute_types);
         const cities = ensureArray(req.body.cities);
         const { rows } = await pool.query(
-            `SELECT DISTINCT college_name FROM data_table 
-             WHERE institute_type = ANY($1) 
+            `SELECT DISTINCT college_name FROM data_table
+             WHERE institute_type = ANY($1)
              AND city = ANY($2)
-             AND year = 2024
+             AND year = 2025
              ORDER BY college_name ASC`,
             [instituteTypes, cities]
         );
@@ -239,10 +262,11 @@ app.post('/update-colleges', async (req, res) => {
     }
 });
 
+
 app.post('/update-branches', async (req, res) => {
     try {
         const { rows } = await pool.query(
-            'SELECT DISTINCT branch FROM data_table WHERE college_name = ANY($1) AND year = 2024',
+            'SELECT DISTINCT branch FROM data_table WHERE college_name = ANY($1) AND year = 2025',
             [req.body.colleges || []]
         );
         // Return array of branch names (strings)
@@ -253,9 +277,11 @@ app.post('/update-branches', async (req, res) => {
     }
 });
 
+
 app.get('/generate-categories', (req, res) => {
     res.json({ categories: generateCategories(req.query.caste, req.query.class, req.query.gender) });
 });
+
 
 // Search Route (Unchanged from your original logic)
 app.post('/search', ensureAuthenticated, async (req, res) => {
@@ -277,36 +303,46 @@ app.post('/search', ensureAuthenticated, async (req, res) => {
 
 
 
+
+
+
+
+
 const selectedCollegeNames = ensureArray(req.body.college_name);
 const instituteTypes = ensureArray(req.body.institute_type);
 const selectedCities = ensureArray(req.body.city);
 const selectedBranches = ensureArray(req.body.branch);
 // const selectedCategories = ensureArray(req.body.selectedCategories);
 
+
         const lowerBound = rank - rankRange;
         const upperBound = rank + rankRange;
+
 
         // Generate categories
       let selectedCategories = req.body.selectedCategories || [];
       if (!Array.isArray(selectedCategories)) {
         selectedCategories = [selectedCategories];
      }
-let categories = selectedCategories.length > 0 ? 
-    selectedCategories : 
+let categories = selectedCategories.length > 0 ?
+    selectedCategories :
     generateCategories(selectedCaste, selectedClass, selectedGender);
+
 
 if (!Array.isArray(categories)) {
     categories = [categories];
 }
         // Create condition for selected categories
-        const categoryCondition = categories.length > 0 ? 
-            `allotted_category = ANY($8)` : 
+        const categoryCondition = categories.length > 0 ?
+            `allotted_category = ANY($8)` :
             'TRUE';
 
+
         // Handle round values
-        const roundValues = selectedRound === 'FIRST&UPGRADE' ? 
-            ['FIRST', 'UPGRADE'] : 
+        const roundValues = selectedRound === 'FIRST&UPGRADE' ?
+            ['FIRST', 'UPGRADE'] :
             [selectedRound];
+
 
         // Domicile condition
         let domicileCondition = '';
@@ -316,9 +352,10 @@ if (!Array.isArray(categories)) {
             domicileCondition = 'AND (domicile = \'YE\' OR domicile = \'PR\')';
         }
 
+
         // Main query
         const query = `
-            SELECT college_name, institute_type, branch, allotted_category, 
+            SELECT college_name, institute_type, branch, allotted_category,
                    opening_rank, closing_rank, city, year, round
             FROM data_table
             WHERE closing_rank BETWEEN $1 AND $2
@@ -327,10 +364,11 @@ if (!Array.isArray(categories)) {
             AND institute_type = ANY($4)
             AND branch = ANY($5)
             AND city = ANY($6)
-            AND year = 2024
+            AND year = 2025
             AND round = ANY($7)
             ${domicileCondition}
         `;
+
 
         const values = [
             lowerBound,
@@ -343,24 +381,31 @@ if (!Array.isArray(categories)) {
             categories
         ];
 
+
     const { rows: results } = await pool.query(query, values);
-        
+       
         // Process results (same as your original code)
         const uniqueResults = {};
         results.forEach(row => {
             const key = `${row.college_name}-${row.branch}`;
             if (!uniqueResults[key] || row.closing_rank > uniqueResults[key].closing_rank) {
+                // Add the 2025 ranks with the correct year suffix
+                row.opening_rank_2025 = row.opening_rank;
+                row.closing_rank_2025 = row.closing_rank;
                 uniqueResults[key] = row;
             }
         });
 
+
         const finalResults = Object.values(uniqueResults);
+
 
         // Handle paid turns: do not decrement if there are zero results
         // Store turns BEFORE any decrement
 // Store paid turns BEFORE any decrement
 let turnsBeforeSearch = req.user.paid_turns;
 let paidSearchConsumed = false;
+
 
 if (finalResults.length > 0) {
     const client = await pool.connect();
@@ -387,6 +432,7 @@ if (finalResults.length > 0) {
     }
 }
 
+
 // Store the actual turns BEFORE search (crucial for display logic)
 req.session.searchPayload = {
     results: finalResults,
@@ -394,6 +440,8 @@ req.session.searchPayload = {
     paidSearchConsumed,
     turnsBeforeSearch
 };
+
+
 
 
         // Historical data processing
@@ -410,14 +458,11 @@ req.session.searchPayload = {
             historicalData[key] = rank;
         });
 
+
         // Merge historical data
         finalResults.forEach(result => {
-            const keys = [2022, 2023, 2024].map(year => 
-                `${result.college_name}-${result.branch}-${result.allotted_category}-${result.round}-${year}`
-            );
-            
-            keys.forEach((key, i) => {
-                const year = 2022 + i;
+            [2022, 2023, 2024].forEach(year => {
+                const key = `${result.college_name}-${result.branch}-${result.allotted_category}-${result.round}-${year}`;
                 if (historicalData[key]) {
                     result[`opening_rank_${year}`] = historicalData[key].opening_rank;
                     result[`closing_rank_${year}`] = historicalData[key].closing_rank;
@@ -428,12 +473,14 @@ req.session.searchPayload = {
             });
         });
 
+
         // Trend ranks
         const trendResult = await pool.query('SELECT college_name, branch, rank_number FROM ranked_list');
         const rankMap = new Map();
         trendResult.rows.forEach(row => {
             rankMap.set(`${row.college_name}-${row.branch}`, row.rank_number);
         });
+
 
         // Sorting
         finalResults.sort((a, b) => {
@@ -444,12 +491,13 @@ req.session.searchPayload = {
                 const rankB = rankMap.get(keyB) || Number.MAX_SAFE_INTEGER;
                 return rankA - rankB;
             } else if (sortBy === 'closing_rank') {
-                return a.closing_rank_2024 - b.closing_rank_2024;
+                return a.closing_rank_2025 - b.closing_rank_2025;
             } else if (sortBy === 'opening_rank') {
-                return a.opening_rank_2024 - b.opening_rank_2024;
+                return a.opening_rank_2025 - b.opening_rank_2025;
             }
             return 0;
         });
+
 
         // Store the computed results and related metadata in session and redirect (PRG pattern)
         // This prevents the browser from re-submitting the POST on refresh and avoids duplicate turn consumption.
@@ -466,6 +514,7 @@ req.session.searchPayload = {
     }
 });
 
+
 // Results page (GET) - reads search payload from session and renders results without re-running the search
 app.get('/results', ensureAuthenticated, async (req, res) => {
     try {
@@ -474,6 +523,7 @@ app.get('/results', ensureAuthenticated, async (req, res) => {
             // No search in session; redirect to homepage
             return res.redirect('/');
         }
+
 
         // Render results using the stored payload. Do NOT re-run the search logic here — that would re-consume turns.
         return res.render('results', {
@@ -489,6 +539,7 @@ app.get('/results', ensureAuthenticated, async (req, res) => {
     }
 });
 
+
 // Create Razorpay order
 app.post('/payment/create-order', ensureAuthenticated, async (req, res) => {
     try {
@@ -500,6 +551,7 @@ app.post('/payment/create-order', ensureAuthenticated, async (req, res) => {
         };
         if (!plans[plan]) return res.status(400).json({ error: 'Invalid plan' });
 
+
         const orderOptions = {
             amount: plans[plan].amount, // in paise
             currency: 'INR',
@@ -507,14 +559,36 @@ app.post('/payment/create-order', ensureAuthenticated, async (req, res) => {
             payment_capture: 1
         };
 
+
         const order = await razorpay.orders.create(orderOptions);
         // store mapping receipt -> plan turns in payments table
         await pool.query('INSERT INTO payments(receipt_id, user_id, plan_key, amount, order_id, status) VALUES($1,$2,$3,$4,$5,$6)', [order.receipt, req.user.id, plan, order.amount, order.id, 'CREATED']);
-        // persist turnsBeforeSearch in session for robust server-side use during verify
+        // Persist context for verification: capture origin ('index' | 'results') and turnsBeforeSearch snapshot
+        // Prefer explicit origin from client, fallback to Referer header, then final fallback to heuristic.
         try {
-            const tb = (req.session && req.session.searchPayload && typeof req.session.searchPayload.turnsBeforeSearch !== 'undefined') ? req.session.searchPayload.turnsBeforeSearch : (typeof req.body.turnsBeforeSearch !== 'undefined' ? req.body.turnsBeforeSearch : 0);
+            const originFromBody = (req.body && typeof req.body.origin === 'string') ? req.body.origin.toLowerCase() : undefined;
+            const referer = req.get('referer') || '';
+            let origin = originFromBody || (referer.includes('/results') ? 'results' : 'index');
+            // Final fallback to legacy heuristic if still unknown
+            if (!origin) {
+                const hasSearchPayload = !!(req.session && req.session.searchPayload);
+                origin = hasSearchPayload ? 'results' : 'index';
+            }
+            // Prefer explicit turnsBeforeSearch from body (results page can pass it)
+            let tb = undefined;
+            if (typeof req.body?.turnsBeforeSearch === 'number' && !Number.isNaN(req.body.turnsBeforeSearch)) {
+                tb = Number(req.body.turnsBeforeSearch);
+            }
+            // If not provided, try session snapshot when origin is results
+            if (typeof tb === 'undefined' && origin === 'results' && req.session && req.session.searchPayload && typeof req.session.searchPayload.turnsBeforeSearch !== 'undefined') {
+                tb = Number(req.session.searchPayload.turnsBeforeSearch);
+            }
+            // Fallback to current paid turns
+            if (typeof tb === 'undefined') {
+                tb = Number(req.user.paid_turns || 0);
+            }
             if (!req.session.pendingPayments) req.session.pendingPayments = {};
-            req.session.pendingPayments[order.receipt] = Number(tb);
+            req.session.pendingPayments[order.receipt] = { tb, origin };
         } catch (e) {}
         res.json({ order, planKey: plan, planLabel: plans[plan].label, turns: plans[plan].turns, key_id: process.env.RAZORPAY_KEY_ID || '' });
     } catch (err) {
@@ -522,6 +596,7 @@ app.post('/payment/create-order', ensureAuthenticated, async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
 
 // Verify payment
 // Verify payment
@@ -531,47 +606,56 @@ app.post('/payment/create-order', ensureAuthenticated, async (req, res) => {
 app.post('/payment/verify', ensureAuthenticated, async (req, res) => {
     try {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature, turnsBeforeSearch } = req.body;
-        
+       
         // Verify signature
         const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || '');
         hmac.update(razorpay_order_id + '|' + razorpay_payment_id);
         const generated_signature = hmac.digest('hex');
 
+
         if (generated_signature !== razorpay_signature) {
             return res.status(400).json({ error: 'Invalid signature' });
         }
+
 
         // Get payment details
         const { rows } = await pool.query('SELECT * FROM payments WHERE order_id = $1', [razorpay_order_id]);
         if (!rows[0]) return res.status(400).json({ error: 'Order not found' });
         const receiptId = rows[0].receipt_id;
-        // prefer session-captured turnsBeforeSearch associated with the receipt; fallback to client-provided value
-        const tbFromSession = (req.session && req.session.pendingPayments && typeof req.session.pendingPayments[receiptId] !== 'undefined')
-            ? Number(req.session.pendingPayments[receiptId])
-            : (typeof turnsBeforeSearch !== 'undefined' ? Number(turnsBeforeSearch) : undefined);
+        // Prefer session-captured context associated with the receipt; fallback to client-provided value
+        const sessionEntry = (req.session && req.session.pendingPayments && typeof req.session.pendingPayments[receiptId] !== 'undefined')
+            ? req.session.pendingPayments[receiptId]
+            : undefined;
+        // Back-compat: support both numeric (old) and object { tb, origin } (new) entries
+        const tbFromSession = (typeof sessionEntry === 'object' && sessionEntry !== null && 'tb' in sessionEntry)
+            ? Number(sessionEntry.tb)
+            : (typeof sessionEntry === 'number' ? Number(sessionEntry) : (typeof turnsBeforeSearch !== 'undefined' ? Number(turnsBeforeSearch) : undefined));
+        const originHint = (typeof sessionEntry === 'object' && sessionEntry !== null && sessionEntry.origin) ? String(sessionEntry.origin) : 'unknown';
         const effectiveTB = (typeof tbFromSession === 'number' && !Number.isNaN(tbFromSession)) ? tbFromSession : 0;
-        
+       
         const planKey = rows[0].plan_key;
         const planTurns = planKey === 'small' ? 5 : planKey === 'medium' ? 15 : 50;
-        // Determine lock state once; used throughout and in response
-        const wasLocked = effectiveTB === 0;
         const client = await pool.connect();
         let newTurns = 0;
         let turnsActuallyAdded = 0;
+        let lockedAtPurchase = false;
         try {
             await client.query('BEGIN');
             const { rows: userRows } = await client.query(
-                'SELECT paid_turns FROM users WHERE id = $1 FOR UPDATE', 
+                'SELECT paid_turns FROM users WHERE id = $1 FOR UPDATE',
                 [req.user.id]
             );
             const currentTurns = userRows[0]?.paid_turns || 0;
-            if (wasLocked) {
-                turnsActuallyAdded = planTurns - 1;
-                newTurns = currentTurns + turnsActuallyAdded;
+            // Decide immediate unlock based on the live balance at purchase time, not stale snapshots
+            lockedAtPurchase = currentTurns <= 0;
+            // Only apply the immediate unlock consumption (-1) for purchases initiated on the results page
+            // where the page is currently locked (no available turns). On index page, always add full turns.
+            if (originHint === 'results' && lockedAtPurchase) {
+                turnsActuallyAdded = Math.max(0, planTurns - 1);
             } else {
                 turnsActuallyAdded = planTurns;
-                newTurns = currentTurns + turnsActuallyAdded;
             }
+            newTurns = currentTurns + turnsActuallyAdded;
             await client.query(
                 'UPDATE users SET paid_turns = $1 WHERE id = $2',
                 [newTurns, req.user.id]
@@ -589,11 +673,11 @@ app.post('/payment/verify', ensureAuthenticated, async (req, res) => {
         }
         // reflect new turns in session user and cleanup session pending mapping
         try { req.user.paid_turns = newTurns; } catch(e) {}
-        try { if (req.session && req.session.pendingPayments && receiptId) { delete req.session.pendingPayments[receiptId]; } } catch(e) {}
-        res.json({ 
-            success: true, 
+    try { if (req.session && req.session.pendingPayments && receiptId) { delete req.session.pendingPayments[receiptId]; } } catch(e) {}
+        res.json({
+            success: true,
             newTurns: newTurns,
-            wasLocked: wasLocked,
+            wasLocked: lockedAtPurchase,
             turnsAdded: turnsActuallyAdded
         });
     } catch (err) {
@@ -603,6 +687,7 @@ app.post('/payment/verify', ensureAuthenticated, async (req, res) => {
 });
 // ...existing code...
 
+
 // Start server
 app.listen(port, () => {
     console.log(`\n✅ ==============================================`);
@@ -611,4 +696,10 @@ app.listen(port, () => {
     console.log(`\n🌐 Open in browser: http://localhost:${port}/`);
     console.log(`🚨 Press Ctrl+C to stop the server\n`);
 });
+
+
+
+
+
+
 

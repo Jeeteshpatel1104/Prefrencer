@@ -115,6 +115,13 @@
       gap: 15px;
     }
 
+    /* Match index header right group (pill + user) */
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
     .user-name {
       font-weight: 500;
       color: var(--dark);
@@ -585,12 +592,10 @@
 
     @media (max-width: 480px) {
       body {
-        padding: 15px;
+        padding: 10px; /* match index.ejs */
       }
       
-      header {
-        padding: 15px;
-      }
+      /* Use same header padding as index (set at <=768px: 12px 16px) */
       
       .results-container {
         padding: 20px 15px;
@@ -601,6 +606,13 @@
         padding: 12px 15px;
         font-size: 14px;
       }
+      /* Match index.ejs header mobile layout exactly */
+      .header-content { flex-direction: row !important; align-items: center !important; justify-content: space-between !important; }
+      .header-logo { height: 34px !important; }
+      .user-info { display: flex !important; align-items: center !important; gap: 8px !important; }
+      .header-right { gap: 8px !important; }
+      .user-name { font-size: 13px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; max-width: 45vw !important; }
+      .logout-btn { padding: 6px 10px !important; font-size: 13px !important; }
     }
     /* Additional mobile overrides to improve fit while preserving desktop styles */
     @media (max-width: 768px) {
@@ -622,9 +634,8 @@
     }
 
     @media (max-width: 480px) {
-      body { padding: 12px; }
-      .header-logo { height: 34px; }
-      .user-name { font-size: 14px; }
+      body { padding: 10px; }
+      .user-name { font-size: 13px; }
       .results-table { font-size: 13px; }
       .results-table tbody tr { padding: 8px 6px; }
       .back-link { font-size: 13px; padding: 6px 8px; }
@@ -670,7 +681,8 @@
   .header-content { flex-direction: row !important; align-items: center !important; justify-content: space-between !important; }
   .header-logo { height: 34px !important; }
   .user-info { display:flex !important; align-items:center !important; gap:8px !important; }
-  .user-name { font-size:13px !important; max-width:50vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .header-right { gap: 8px !important; }
+  .user-name { font-size:13px !important; max-width:45vw !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
   .logout-btn { padding:6px 10px !important; font-size:13px !important; }
 
       /* hide big decorations and back link on mobile to reduce clutter and save vertical space */
@@ -823,6 +835,40 @@
 @media (max-width: 768px) {
   .turns-label {
     display: none;
+  }
+}
+/* Mobile size adjustments for turns pill */
+@media (max-width:600px) {
+  .turns-pill {
+    padding: 4px 10px;
+    font-size: 12px; /* down from 14px */
+    gap: 4px;
+    position: relative; top: 1px; /* nudge down to align with user name */
+  }
+  .turns-pill .bx, .turns-pill i {
+    font-size: 16px; /* slightly smaller icon */
+  }
+  /* Shrink Search Again button */
+  #search-again.btn, a#search-again.btn, #search-again {
+    font-size: 13px;
+    padding: 8px 14px;
+    line-height: 1.1;
+    border-radius: 10px;
+    width: auto !important;          /* override .btn { width:100% } */
+    align-self: center;               /* center in .actions (flex-direction: column) */
+    margin-left: auto; margin-right: auto; /* fallback centering */
+  }
+  #search-again i { font-size: 16px; }
+}
+/* Exact match to index.ejs mobile submit button (<=480px) */
+@media (max-width:480px) {
+  #search-again.btn, a#search-again.btn, #search-again {
+    padding: 12px 30px; /* match index .submit-btn */
+    font-size: 16px;    /* match index .submit-btn */
+    border-radius: 10px;/* match index .submit-btn */
+    width: auto !important;          /* ensure not full width on very small screens */
+    align-self: center;               /* centered like index submit (which is auto width with margin auto) */
+    margin-left: auto; margin-right: auto;
   }
 }
   </style>
@@ -1418,8 +1464,8 @@ body.modal-open {
                         <circle cx="50" cy="60" r="7" fill="white"/>
           </svg>
       </div>
-      <% if (typeof user !== 'undefined' && user) { %>
-      <div style="display:flex; align-items:center; gap:12px;">
+  <% if (typeof user !== 'undefined' && user) { %>
+  <div class="header-right">
           <div class="turns-pill <%= (user.paid_turns && user.paid_turns > 0) ? 'positive' : 'zero' %>" id="turns-pill">
             <i class='bx bx-coin-stack' style="font-size:16px;color:inherit"></i>
             <span id="turns-count"><%= (user.paid_turns || 0) %></span>
@@ -1427,7 +1473,7 @@ body.modal-open {
           </div>
           <div class="user-info">
       <% } else { %>
-      <div class="user-info">
+  <div class="user-info">
       <% } %>
         <% if (typeof user !== 'undefined' && user) { %>
           <span class="user-name"><%= user.name || user.displayName || user.email %></span>
@@ -1474,7 +1520,7 @@ body.modal-open {
           let betterCount = 0;
           if (userRank && results && Array.isArray(results)) {
             results.forEach(r => {
-              const c = Number(r.closing_rank_2024 || r.closing_rank || 0);
+              const c = Number(r.closing_rank_2025 || r.closing_rank || 0);
               if (c > userRank) betterCount++;
             });
           }
@@ -1494,7 +1540,7 @@ body.modal-open {
         </div>
         <div class="summary-card">
           <div class="summary-value"><%= percent %>%</div>
-          <div class="summary-label">Chance (%) (closing rank &gt; your rank)</div>
+          <div class="summary-label">Chance (%) (closing ranks &gt; your rank)</div>
         </div>
       </div>
     </div>
@@ -1656,6 +1702,10 @@ try {
         }
         .search-toast i { font-size: 18px; line-height: 1; }
         @keyframes toast-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+        @media (max-width:600px){
+          .search-toast { padding: 6px 10px; font-size:12px; gap:6px; top:70px; }
+          .search-toast i { font-size:16px; }
+        }
       `;
       document.head.appendChild(style);
 
@@ -1669,13 +1719,16 @@ try {
           setTimeout(() => toast.remove(), 4000);
         } catch (e) {}
       }
+      // Expose globally so other scripts (e.g., payment modal handler) can invoke it
+      try { window.showTurnConsumedToast = showTurnConsumedToast; } catch(e) {}
 
       // Add probability calculation function (moved here so renderRow/renderCard can use it)
       function calculateProbability(userRank, result) {
         const cutoffs = [
+          result.closing_rank_2025,
           result.closing_rank_2024,
           result.closing_rank_2023,
-          result.closing_rank_2022
+          // result.closing_rank_2022
         ].filter(rank => rank && rank !== 'N/A' && !isNaN(Number(rank))).map(Number);
 
         if (cutoffs.length === 0) return 'unknown';
@@ -1711,8 +1764,8 @@ try {
       });
 
       function renderRow(r, idx, locked) {
-  const opening = r.opening_rank_2024 || r.opening_rank || 'N/A';
-  const closing = r.closing_rank_2024 || r.closing_rank || 'N/A';
+  const opening = r.opening_rank_2025 || r.opening_rank || 'N/A';
+  const closing = r.closing_rank_2025 || r.closing_rank || 'N/A';
   const userRank = search && search.rank ? search.rank : 0;
   if (locked) {
     return `
@@ -1775,8 +1828,8 @@ try {
 }
 
       function renderCard(r, displayIndex, locked) {
-  const opening = r.opening_rank_2024 || r.opening_rank || 'N/A';
-  const closing = r.closing_rank_2024 || r.closing_rank || 'N/A';
+  const opening = r.opening_rank_2025 || r.opening_rank || 'N/A';
+  const closing = r.closing_rank_2025 || r.closing_rank || 'N/A';
   const userRank = search && search.rank ? search.rank : 0;
   if (locked) {
     return `
@@ -2341,7 +2394,11 @@ document.querySelectorAll('.plan-select-btn').forEach(btn => {
             const resp = await fetch('/payment/create-order', { 
                 method: 'POST', 
                 headers: { 'Content-Type':'application/json' }, 
-                body: JSON.stringify({ plan }) 
+                body: JSON.stringify({ 
+                  plan, 
+                  origin: 'results',
+                  turnsBeforeSearch: (typeof window.__USER_PAID_BEFORE_SEARCH !== 'undefined' ? Number(window.__USER_PAID_BEFORE_SEARCH) : null)
+                }) 
             });
             
             const data = await resp.json();
@@ -2373,7 +2430,7 @@ document.querySelectorAll('.plan-select-btn').forEach(btn => {
                         try { window.applyPaidUpdate(verifyData.newTurns); } catch(e) {}
                         // If entries were locked (turnBeforeSearch == 0), current unlock consumes 1 new turn
                         if (verifyData.wasLocked === true) {
-                          try { showTurnConsumedToast('1 turn consumed'); } catch(e) {}
+                          try { (window.showTurnConsumedToast || showTurnConsumedToast)('1 turn consumed'); } catch(e) {}
                         }
                         // Close modal shortly after
                         setTimeout(() => { try { closeModal(); } catch(e) {} }, 400);
@@ -2728,6 +2785,10 @@ refreshResultsAfterPayment();
 
     </body>
     </html>
+
+
+
+
 
 
 
