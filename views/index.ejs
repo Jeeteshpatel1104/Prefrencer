@@ -2005,18 +2005,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 } catch (e) { /* ignore */ }
             });
 
-            // Trigger dynamic population (cities -> colleges -> branches) based on applied institute_type
-            try {
-                // If institute_type was saved, pass it through so server filtering happens deterministically.
-                const savedInstituteTypes = data['institute_type'] || data['institute_type[]'] || null;
-                const instituteTypesArr = savedInstituteTypes ? (Array.isArray(savedInstituteTypes) ? savedInstituteTypes : [savedInstituteTypes]) : null;
-                // Also thread saved cities/colleges so downstream fetches respect the user's saved selections
-                const savedCities = data['city'] || data['city[]'] || null;
-                const savedCitiesArr = savedCities ? (Array.isArray(savedCities) ? savedCities : [savedCities]) : null;
-                const savedColleges = data['college_name'] || data['college_name[]'] || null;
-                const savedCollegesArr = savedColleges ? (Array.isArray(savedColleges) ? savedColleges : [savedColleges]) : null;
-                await updateCities(instituteTypesArr, savedCitiesArr, savedCollegesArr);
-            } catch (e) { /* function may not yet be ready */ }
+
+      // Trigger dynamic population (cities -> colleges -> branches) based on applied institute_type
+      try {
+        // If institute_type was saved, pass it through so server filtering happens deterministically.
+        const savedInstituteTypes = data['institute_type'] || data['institute_type[]'] || null;
+        const instituteTypesArr = savedInstituteTypes ? (Array.isArray(savedInstituteTypes) ? savedInstituteTypes : [savedInstituteTypes]) : null;
+        // Also thread saved cities/colleges so downstream fetches respect the user's saved selections
+        const savedCities = data['city'] || data['city[]'] || null;
+        const savedCitiesArr = savedCities ? (Array.isArray(savedCities) ? savedCities : [savedCities]) : null;
+        const savedColleges = data['college_name'] || data['college_name[]'] || null;
+        const savedCollegesArr = savedColleges ? (Array.isArray(savedColleges) ? savedColleges : [savedColleges]) : null;
+        await updateCities(instituteTypesArr, savedCitiesArr, savedCollegesArr);
+      } catch (e) { /* function may not yet be ready */ }
+
+      // Restore caste select value after options are populated
+      try {
+        const savedCaste = data['caste'];
+        if (savedCaste) {
+          const casteSelect = document.getElementById('caste');
+          if (casteSelect) {
+            casteSelect.value = Array.isArray(savedCaste) ? savedCaste[0] : savedCaste;
+            casteSelect.dispatchEvent(new Event('change'));
+          }
+        }
+      } catch (e) { /* ignore */ }
 
             // Re-apply saved advanced selections when their checkbox inputs appear. Use short retry loop.
             // Support both normalized keys ('city') and legacy bracketed keys ('city[]') for backward compatibility.
