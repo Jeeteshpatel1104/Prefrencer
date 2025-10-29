@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Optional: point to sitemap if you host one
+Sitemap: https://collegepreferencer.com/sitemap.xml
