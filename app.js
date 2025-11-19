@@ -181,8 +181,8 @@ function generateCategories(selectedCaste, selectedClass, selectedGender) {
 }
 
 
-// Main Route (Fixed for template compatibility)
-app.get('/', ensureAuthenticated, async (req, res) => {
+// Main Route (Public for SEO crawling and indexing)
+app.get('/', async (req, res) => {
     try {
         const [
             instituteTypes,
