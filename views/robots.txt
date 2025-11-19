@@ -1,5 +1,4 @@
 User-agent: *
-Allow: /
+Disallow:
 
-# Optional: point to sitemap if you host one
-Sitemap: https://collegepreferencer.com/sitemap.xml
+Sitemap: https://collegepreferencer.com/sitemap.xml 
