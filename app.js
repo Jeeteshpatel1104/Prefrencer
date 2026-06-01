@@ -3,9 +3,16 @@ const express = require('express');
 const { Pool } = require('pg');
 const path = require('path');
 const session = require('express-session');
+const PgSession = require('connect-pg-simple')(session);
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
+const isProduction = process.env.NODE_ENV === 'production';
+
+const pool = new Pool({
+    connectionString: process.env.DB_CONNECTION_STRING,
+    ssl: { rejectUnauthorized: false }
+});
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -17,26 +24,26 @@ app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-
-// Session
+// Session (PostgreSQL store — survives restarts; no MemoryStore warning)
 app.use(session({
+    store: new PgSession({
+        pool,
+        tableName: 'session',
+        createTableIfMissing: true
+    }),
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: process.env.NODE_ENV === 'production' }
+    proxy: isProduction,
+    cookie: {
+        secure: isProduction,
+        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+    }
 }));
-
 
 // Passport
 app.use(passport.initialize());
 app.use(passport.session());
-
-
-// PostgreSQL Connection
-const pool = new Pool({
-    connectionString: process.env.DB_CONNECTION_STRING,
-    ssl: { rejectUnauthorized: false }
-});
 
 
 const Razorpay = require('razorpay');
@@ -53,6 +60,7 @@ const razorpay = new Razorpay({
 pool.connect()
     .then(() => console.log('✅ Connected to PostgreSQL database'))
     .catch(err => console.error('❌ Database connection error:', err));
+
 
 
 // Passport Configuration
