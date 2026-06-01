@@ -1574,17 +1574,31 @@ body.modal-open {
             });
         }
 
+
         function updateCategories() {
             const caste = document.getElementById('caste').value || 'EWS';
             const classType = document.getElementById('class').value || '';
             const gender = document.getElementById('gender').value || '';
 
-            fetch(`/generate-categories?caste=${caste}&class=${classType}&gender=${gender}`)
+            return fetch(`/generate-categories?caste=${caste}&class=${classType}&gender=${gender}`)
                 .then(response => response.json())
                 .then(data => {
                     generateCategoryCheckboxes(data.categories);
+                    return data.categories;
                 })
-                .catch(error => console.error('Error fetching categories:', error));
+                .catch(error => {
+                    console.error('Error fetching categories:', error);
+                    return [];
+                });
+        }
+
+        function applyCheckboxGroupSelection(name, saved, emitChanges) {
+            if (!applySavedCheckboxSelections(name, saved, emitChanges)) return;
+            const checkboxes = Array.from(document.querySelectorAll(`[name="${name}"]`));
+            const selectAll = document.getElementById('select_all_categories');
+            if (selectAll && name === 'selectedCategories') {
+                selectAll.checked = checkboxes.every(cb => cb.checked);
+            }
         }
 
         // ==========================================
@@ -1740,13 +1754,41 @@ function initMultiSelect(groupKey) {
     syncSelectAll();
 }
 
+// Apply saved checkbox values; if none match the current list, check the first item.
+function applySavedCheckboxSelections(fieldName, savedValues, emitChanges) {
+    const list = savedValues == null ? [] : (Array.isArray(savedValues) ? savedValues : [savedValues]);
+    if (!list.length) return false;
+    const cbInputs = Array.from(document.querySelectorAll(`[name="${fieldName}"]`));
+    if (!cbInputs.length) return false;
+    const desiredNorm = list.map(s => String(s || '').trim().toLowerCase());
+    let anyChecked = false;
+    cbInputs.forEach(cb => {
+        const match = desiredNorm.indexOf(String(cb.value || '').trim().toLowerCase()) !== -1;
+        const prev = cb.checked;
+        cb.checked = match;
+        if (match) anyChecked = true;
+        if (emitChanges && prev !== cb.checked) {
+            cb.dispatchEvent(new Event('change'));
+        }
+    });
+    if (!anyChecked) {
+        const first = cbInputs[0];
+        const prev = first.checked;
+        first.checked = true;
+        if (emitChanges && !prev) {
+            first.dispatchEvent(new Event('change'));
+        }
+    }
+    return true;
+}
+
 // Helpers to read checked values
 function getChecked(groupKey) {
     return Array.from(document.querySelectorAll(`input[name="${groupKey}[]"]:checked`)).map(cb => cb.value);
 }
 
 // Dynamic updates (Cities -> Colleges -> Branches), all using the unified renderer
-function updateCities(instituteTypesOverride, savedCitiesOverride, savedCollegesOverride) {
+function updateCities(instituteTypesOverride, savedCitiesOverride, savedCollegesOverride, savedBranchesOverride) {
     const selectedInstituteTypes = Array.isArray(instituteTypesOverride) ? instituteTypesOverride : Array.from(document.querySelectorAll('input[name="institute_type"]:checked')).map(cb => cb.value);
     if (selectedInstituteTypes.length === 0) return Promise.resolve();
     return fetch('/update-cities', {
@@ -1760,15 +1802,11 @@ function updateCities(instituteTypesOverride, savedCitiesOverride, savedColleges
         renderGroupOptions('city', items);
         // If caller provided savedCities, apply them now BEFORE wiring listeners (initMultiSelect attaches listeners)
         if (Array.isArray(savedCitiesOverride) && savedCitiesOverride.length > 0) {
-            const cbInputs = Array.from(document.querySelectorAll('input[name="city[]"]'));
-            const desiredNorm = savedCitiesOverride.map(s => String(s || '').trim().toLowerCase());
-            cbInputs.forEach(cb => {
-                try { cb.checked = desiredNorm.indexOf(String(cb.value || '').trim().toLowerCase()) !== -1; } catch(e){}
-            });
+            applySavedCheckboxSelections('city[]', savedCitiesOverride);
         }
         initMultiSelect('city');
         // return the downstream promise so callers can wait for full cascade; pass savedCitiesOverride and savedCollegesOverride so downstream lists are filtered
-        return updateColleges(savedCitiesOverride || null, selectedInstituteTypes, savedCollegesOverride || null);
+        return updateColleges(savedCitiesOverride || null, selectedInstituteTypes, savedCollegesOverride || null, savedBranchesOverride || null);
     })
     .catch(err => {
         console.error('Error updating cities:', err);
@@ -1777,7 +1815,7 @@ function updateCities(instituteTypesOverride, savedCitiesOverride, savedColleges
     });
 }
 
-function updateColleges(citiesOverride, instituteTypesOverride, savedCollegesOverride) {
+function updateColleges(citiesOverride, instituteTypesOverride, savedCollegesOverride, savedBranchesOverride) {
     const selectedInstituteTypes = Array.isArray(instituteTypesOverride) ? instituteTypesOverride : Array.from(document.querySelectorAll('input[name="institute_type"]:checked')).map(cb => cb.value);
     const selectedCities = Array.isArray(citiesOverride) ? citiesOverride : getChecked('city');
     if (selectedInstituteTypes.length === 0 || selectedCities.length === 0) return Promise.resolve();
@@ -1792,14 +1830,10 @@ function updateColleges(citiesOverride, instituteTypesOverride, savedCollegesOve
         renderGroupOptions('college_name', items);
         // Apply saved colleges before wiring listeners
         if (Array.isArray(savedCollegesOverride) && savedCollegesOverride.length > 0) {
-            const cbInputs = Array.from(document.querySelectorAll('input[name="college_name[]"]'));
-            const desiredNorm = savedCollegesOverride.map(s => String(s || '').trim().toLowerCase());
-            cbInputs.forEach(cb => {
-                try { cb.checked = desiredNorm.indexOf(String(cb.value || '').trim().toLowerCase()) !== -1; } catch(e){}
-            });
+            applySavedCheckboxSelections('college_name[]', savedCollegesOverride);
         }
         initMultiSelect('college_name');
-        return updateBranches(savedCollegesOverride || null);
+        return updateBranches(savedCollegesOverride || null, savedBranchesOverride || null);
     })
     .catch(err => {
         console.error('Error updating colleges:', err);
@@ -1807,7 +1841,7 @@ function updateColleges(citiesOverride, instituteTypesOverride, savedCollegesOve
     });
 }
 
-function updateBranches(collegesOverride) {
+function updateBranches(collegesOverride, savedBranchesOverride) {
     const selectedColleges = Array.isArray(collegesOverride) ? collegesOverride : getChecked('college_name');
     if (selectedColleges.length === 0) return Promise.resolve();
     return fetch('/update-branches', {
@@ -1819,6 +1853,9 @@ function updateBranches(collegesOverride) {
     .then(data => {
         const items = (data.branches || []).slice().sort();
         renderGroupOptions('branch', items);
+        if (Array.isArray(savedBranchesOverride) && savedBranchesOverride.length > 0) {
+            applySavedCheckboxSelections('branch[]', savedBranchesOverride);
+        }
         initMultiSelect('branch');
         return Promise.resolve();
     })
@@ -1836,44 +1873,90 @@ const INITIAL = {
     branches: <%- JSON.stringify(branches.map(b => b.branch)) %>
 };
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Normalize the three dropdowns so they look/behave the same from the start
-    renderGroupOptions('city', INITIAL.cities.slice().sort());
-    initMultiSelect('city');
+        const FORM_KEY = 'pf_filters_v1';
+        const FILTER_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 hours
+        let isRestoring = false;
 
-    renderGroupOptions('college_name', INITIAL.colleges.slice());
-    initMultiSelect('college_name');
+        function loadSavedFilters() {
+            try {
+                const raw = localStorage.getItem(FORM_KEY);
+                if (!raw) return null;
+                const data = JSON.parse(raw);
+                if (data._savedAt && (Date.now() - Number(data._savedAt) > FILTER_MAX_AGE_MS)) {
+                    localStorage.removeItem(FORM_KEY);
+                    return null;
+                }
+                return data;
+            } catch (e) {
+                try { localStorage.removeItem(FORM_KEY); } catch (_) { /* ignore */ }
+                return null;
+            }
+        }
 
-    renderGroupOptions('branch', INITIAL.branches.slice().sort());
-    initMultiSelect('branch');
+        function initializeDefaultAdvancedGroups() {
+            renderGroupOptions('city', INITIAL.cities.slice().sort());
+            initMultiSelect('city');
+            renderGroupOptions('college_name', INITIAL.colleges.slice());
+            initMultiSelect('college_name');
+            renderGroupOptions('branch', INITIAL.branches.slice().sort());
+            initMultiSelect('branch');
+        }
 
-    // Institute type changes drive city updates
-    document.querySelectorAll('input[name="institute_type"]').forEach(checkbox => {
-        checkbox.addEventListener('change', updateCities);
-    });
+        function syncConvertedSelectLabels() {
+            document.querySelectorAll('select.form-select[data-converted="true"]').forEach(sel => {
+                const wrapper = sel.closest('.converted-select-wrapper');
+                if (!wrapper) return;
+                const labelSpan = wrapper.querySelector('.converted-select-label');
+                if (!labelSpan) return;
+                const opt = sel.options[sel.selectedIndex];
+                labelSpan.textContent = opt ? opt.text : '';
+            });
+        }
 
-    // Initialize domicile and caste
-    handleDomicileChange();
+        function hasSavedFilters() {
+            return loadSavedFilters() !== null;
+        }
 
-    // Initialize category checkboxes
-            updateCategories();
-            
-            // Set up event listeners for dynamic updates
+        document.addEventListener('DOMContentLoaded', async function() {
+            handleDomicileChange();
+            convertSelects();
+
+            document.querySelectorAll('input[name="institute_type"]').forEach(checkbox => {
+                checkbox.addEventListener('change', updateCities);
+            });
             document.getElementById('caste').addEventListener('change', updateCategories);
             document.getElementById('class').addEventListener('change', updateCategories);
             document.getElementById('gender').addEventListener('change', updateCategories);
-            document.getElementById('domicile').addEventListener('change', updateCategories);
-
-        
-
-            // Attach institute type listeners
-            document.querySelectorAll('input[name="institute_type"]').forEach(checkbox => {
-                checkbox.addEventListener('change', function() {
-                    updateCities();
-                });
+            document.getElementById('domicile').addEventListener('change', function() {
+                handleDomicileChange();
+                updateCategories();
             });
 
-            
+            document.querySelectorAll('.form-container input, .form-container select').forEach(el => {
+                el.addEventListener('change', saveFilters);
+            });
+
+            const form = document.querySelector('.form-container');
+            if (form) {
+                form.addEventListener('submit', function() {
+                    saveFilters();
+                });
+            }
+
+            if (hasSavedFilters()) {
+                try {
+                    await restoreFilters();
+                } catch (e) {
+                    console.warn('Filter restore failed, using defaults', e);
+                    initializeDefaultAdvancedGroups();
+                    updateCategories();
+                }
+            } else {
+                initializeDefaultAdvancedGroups();
+                updateCategories();
+            }
+
+            syncConvertedSelectLabels();
         });
         
         // Convert native select.form-select elements into the same rounded dropdown UI used elsewhere
@@ -1968,130 +2051,94 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // run conversion after initial page setup
-        convertSelects();
-
-        // Persist and restore filters using localStorage so "Back to Search" and "Search Again" keep selections
-        const FORM_KEY = 'pf_filters_v1';
+        function setSelectValue(id, value) {
+            const el = document.getElementById(id);
+            if (!el || value === undefined || value === null) return;
+            el.value = Array.isArray(value) ? value[0] : value;
+        }
 
         // Save form data. Normalize keys by stripping trailing [] so checkbox groups like 'city[]'
         // are stored under 'city' which makes restoration simpler.
         function saveFilters() {
+            if (isRestoring) return;
             const form = document.querySelector('.form-container');
+            if (!form) return;
             const data = {};
             new FormData(form).forEach((v, k) => {
-                // normalize 'city[]' -> 'city'
                 const key = String(k).replace(/\[\]$/, '');
                 if (data[key]) {
                     if (Array.isArray(data[key])) data[key].push(v); else data[key] = [data[key], v];
                 } else data[key] = v;
             });
-            localStorage.setItem(FORM_KEY, JSON.stringify(data));
+            try {
+                data._savedAt = Date.now();
+                localStorage.setItem(FORM_KEY, JSON.stringify(data));
+            } catch (e) {
+                console.warn('Could not save filters to localStorage', e);
+            }
         }
 
         async function restoreFilters() {
-            const raw = localStorage.getItem(FORM_KEY);
-            if (!raw) return;
-            const data = JSON.parse(raw);
+            const data = loadSavedFilters();
+            if (!data) return;
             const form = document.querySelector('.form-container');
+            if (!form) return;
 
-            // Apply non-dependent fields (including institute_type) first so dynamic lists are requested
-            Object.keys(data).forEach(k => {
-                // defer advanced groups (support both normalized and bracketed keys)
-                if (k === 'city' || k === 'city[]' || k === 'college_name' || k === 'college_name[]' || k === 'branch' || k === 'branch[]') return;
-                const val = data[k];
-                const els = form.querySelectorAll(`[name="${k}"]`);
-                if (!els || els.length === 0) return;
-                try {
-                    if (els[0].type === 'checkbox') {
-                        const arr = Array.isArray(val) ? val : [val];
-                        els.forEach(el => {
-                            el.checked = arr.indexOf(el.value) !== -1;
-                            el.dispatchEvent(new Event('change'));
-                        });
-                    } else if (els[0].tagName === 'SELECT' || els[0].type === 'text' || els[0].type === 'number') {
-                        els[0].value = Array.isArray(val) ? val[0] : val;
-                        els[0].dispatchEvent(new Event('change'));
-                    }
-                } catch (e) { /* ignore */ }
-            });
+            isRestoring = true;
+            try {
+                const deferredKeys = new Set([
+                    'city', 'city[]', 'college_name', 'college_name[]', 'branch', 'branch[]',
+                    'selectedCategories', 'domicile', 'caste', 'class', 'gender', '_savedAt'
+                ]);
 
-
-      // Trigger dynamic population (cities -> colleges -> branches) based on applied institute_type
-      try {
-        // If institute_type was saved, pass it through so server filtering happens deterministically.
-        const savedInstituteTypes = data['institute_type'] || data['institute_type[]'] || null;
-        const instituteTypesArr = savedInstituteTypes ? (Array.isArray(savedInstituteTypes) ? savedInstituteTypes : [savedInstituteTypes]) : null;
-        // Also thread saved cities/colleges so downstream fetches respect the user's saved selections
-        const savedCities = data['city'] || data['city[]'] || null;
-        const savedCitiesArr = savedCities ? (Array.isArray(savedCities) ? savedCities : [savedCities]) : null;
-        const savedColleges = data['college_name'] || data['college_name[]'] || null;
-        const savedCollegesArr = savedColleges ? (Array.isArray(savedColleges) ? savedColleges : [savedColleges]) : null;
-        await updateCities(instituteTypesArr, savedCitiesArr, savedCollegesArr);
-      } catch (e) { /* function may not yet be ready */ }
-
-      // Restore caste select value after options are populated
-      try {
-        const savedCaste = data['caste'];
-        if (savedCaste) {
-          const casteSelect = document.getElementById('caste');
-          if (casteSelect) {
-            casteSelect.value = Array.isArray(savedCaste) ? savedCaste[0] : savedCaste;
-            casteSelect.dispatchEvent(new Event('change'));
-          }
-        }
-      } catch (e) { /* ignore */ }
-
-            // Re-apply saved advanced selections when their checkbox inputs appear. Use short retry loop.
-            // Support both normalized keys ('city') and legacy bracketed keys ('city[]') for backward compatibility.
-            const advancedGroups = ['city', 'college_name', 'branch'];
-            advancedGroups.forEach(groupKey => {
-                const saved = data[groupKey] || data[`${groupKey}[]`];
-                if (!saved) return;
-                const desired = Array.isArray(saved) ? saved : [saved];
-
-                let attempts = 0;
-                const maxAttempts = 20; // allow slightly longer for slow networks
-                const interval = 150;
-                const tryApply = () => {
-                    attempts++;
-                    const checkboxes = Array.from(document.querySelectorAll(`input[name="${groupKey}[]"]`));
-                    if (checkboxes.length > 0) {
-                        // perform tolerant matching: trim + toLowerCase for saved vs DOM values
-                        const desiredNorm = desired.map(s => String(s || '').trim().toLowerCase());
-                        checkboxes.forEach(cb => {
-                            try {
-                                const valNorm = String(cb.value || '').trim().toLowerCase();
-                                const should = desiredNorm.indexOf(valNorm) !== -1;
-                                cb.checked = should;
-                            } catch (e) {}
-                        });
-                        // persist the restored choices
-                        try { saveFilters(); } catch (e) { /* ignore */ }
-                        // sync select-all checkbox if present WITHOUT firing its change handler (that would
-                        // override individual selections). Set the checked state directly.
-                        const selectAll = document.getElementById(`select_all_${groupKey}`);
-                        if (selectAll) {
-                            try {
-                                selectAll.checked = checkboxes.every(cb => cb.checked);
-                            } catch (e) { /* ignore */ }
+                Object.keys(data).forEach(k => {
+                    if (deferredKeys.has(k)) return;
+                    const val = data[k];
+                    const els = form.querySelectorAll(`[name="${k}"]`);
+                    if (!els || els.length === 0) return;
+                    try {
+                        if (els[0].type === 'checkbox') {
+                            const arr = Array.isArray(val) ? val : [val];
+                            els.forEach(el => { el.checked = arr.indexOf(el.value) !== -1; });
+                        } else if (els[0].tagName === 'SELECT' || els[0].type === 'text' || els[0].type === 'number') {
+                            els[0].value = Array.isArray(val) ? val[0] : val;
                         }
-                        return;
-                    }
-                    if (attempts < maxAttempts) setTimeout(tryApply, interval);
-                };
-                tryApply();
-            });
+                    } catch (e) { /* ignore */ }
+                });
+
+                setSelectValue('domicile', data.domicile);
+                handleDomicileChange();
+                setSelectValue('caste', data.caste);
+                setSelectValue('class', data.class);
+                setSelectValue('gender', data.gender);
+                handleCasteChange();
+
+                await updateCategories();
+                applyCheckboxGroupSelection('selectedCategories', data.selectedCategories);
+
+                const savedInstituteTypes = data['institute_type'] || data['institute_type[]'] || null;
+                const instituteTypesArr = savedInstituteTypes
+                    ? (Array.isArray(savedInstituteTypes) ? savedInstituteTypes : [savedInstituteTypes])
+                    : null;
+                const savedCities = data['city'] || data['city[]'] || null;
+                const savedCitiesArr = savedCities ? (Array.isArray(savedCities) ? savedCities : [savedCities]) : null;
+                const savedColleges = data['college_name'] || data['college_name[]'] || null;
+                const savedCollegesArr = savedColleges
+                    ? (Array.isArray(savedColleges) ? savedColleges : [savedColleges])
+                    : null;
+                const savedBranches = data['branch'] || data['branch[]'] || null;
+                const savedBranchesArr = savedBranches
+                    ? (Array.isArray(savedBranches) ? savedBranches : [savedBranches])
+                    : null;
+
+                await updateCities(instituteTypesArr, savedCitiesArr, savedCollegesArr, savedBranchesArr);
+
+                syncConvertedSelectLabels();
+                saveFilters();
+            } finally {
+                isRestoring = false;
+            }
         }
-
-        // save on any change
-        document.querySelectorAll('.form-container input, .form-container select').forEach(el => {
-            el.addEventListener('change', saveFilters);
-        });
-
-    // restore at load (if present)
-    // Because restoreFilters is async (waits for dynamic population), call and ignore errors
-    (async function(){ try { await restoreFilters(); } catch(e) { /* ignore */ } })();
 
         // Advanced filters toggle - simple direct handler
         (function() {
@@ -2121,16 +2168,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (advBtn) advBtn.addEventListener('click', function(e) { e.preventDefault(); toggleAdvanced(); });
 
-            // Auto-open if saved advanced filters are present
+            // Auto-open if saved advanced filters are present (respects expiry)
             try {
-                const raw = localStorage.getItem(FORM_KEY);
-                if (raw) {
-                    const data = JSON.parse(raw);
+                const data = loadSavedFilters();
+                if (data) {
                     const advancedKeys = ['institute_type', 'city', 'college_name', 'branch'];
                     outer: for (const k of Object.keys(data)) {
                         for (const a of advancedKeys) {
                             if (k.indexOf(a) !== -1) {
-                                // ensure panel is visible
                                 setToggleState(true);
                                 break outer;
                             }
