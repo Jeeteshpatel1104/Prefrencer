@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>College Preferencer</title>
-    <meta name="description" content="MPDTE College Preferencer 2026 helps you predict admission chances using official MPDTE data, historical cutoffs, and smart filters for personalized college recommendations.">
+    <meta name="description" content="MPDTE College Preferencer 2025 helps you predict admission chances using official MPDTE data, historical cutoffs, and smart filters for personalized college recommendations.">
     <link rel="canonical" href="https://collegepreferencer.com/">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
-    <link rel="icon" href="/favicon.png" type="image/png">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath d='M50 15 L80 45 L75 85 L25 85 L20 45 Z' fill='%234361ee'/%3E%3Ccircle cx='50' cy='45' r='14' fill='%2306d6a0'/%3E%3Ccircle cx='50' cy='70' r='8' fill='white'/%3E%3C/svg%3E" type="image/svg+xml">
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
         :root {
@@ -993,7 +993,7 @@
     margin: 0 7.5%;
     opacity: 0.7;
     transform: scale(0.95);
-    transition: all 0.3s ease;
+    transition: opacity 0.18s ease, transform 0.18s ease;
     overflow: visible; /* ensure badge isn't clipped */
   }
   
@@ -1161,7 +1161,7 @@ body.modal-open {
             <!-- Rank/Domicile/Caste Row -->
             <div class="form-grid">
                 <div class="form-group">
-                    <label class="form-label" for="rank">JEE Main Rank (CRL):</label>
+                    <label class="form-label" for="rank">JEE Main Rank:</label>
                     <input type="number" id="rank" name="rank" class="form-input" required>
                 </div>
                 <div class="form-group">
@@ -1357,16 +1357,7 @@ body.modal-open {
         </div>
 
         <div class="footer">
-            <p class="contact">
-                <strong>Contact Us:</strong> 
-                <a href="mailto:collegepreferencer@gmail.com">
-                    collegepreferencer@gmail.com
-                </a>
-            </p>
-        
-            <p class="copyright">
-                &copy; 2026 College Preferencer. All rights reserved.
-            </p>
+            <p>&copy; 2025 College Preferencer. All rights reserved.</p>
         </div>
     </div>
 
@@ -1573,7 +1564,6 @@ body.modal-open {
                 }
             });
         }
-
 
         function updateCategories() {
             const caste = document.getElementById('caste').value || 'EWS';
@@ -2245,7 +2235,7 @@ const INITIAL = {
         <h3>Starter Pack</h3>
         <div class="plan-price">
           <span class="currency">₹</span>
-          <span class="amount">99</span>
+          <span class="amount">200</span>
         </div>
       </div>
       <div class="plan-features">
@@ -2271,7 +2261,7 @@ const INITIAL = {
         <h3>Pro Pack</h3>
         <div class="plan-price">
           <span class="currency">₹</span>
-          <span class="amount">290</span>
+          <span class="amount">500</span>
           <span class="save-tag">Save 17%</span>
         </div>
       </div>
@@ -2297,7 +2287,7 @@ const INITIAL = {
         <h3>Max Pack</h3>
         <div class="plan-price">
           <span class="currency">₹</span>
-          <span class="amount">900</span>
+          <span class="amount">1000</span>
           <span class="save-tag">Save 50%</span>
         </div>
       </div>
@@ -2576,6 +2566,7 @@ const INITIAL = {
 })();
 
 
+
 // Carousel functionality for mobile plans
 (function() {
   const carousel = document.querySelector('.plans-carousel');
@@ -2633,10 +2624,15 @@ const INITIAL = {
     }
   }
 
-  let scrollTimer = null;
+  // Update active state in real time during the swipe (rAF-throttled) so the
+  // centered pack lights up the instant it crosses center, with no perceived lag.
+  let scrollRaf = null;
   carousel.addEventListener('scroll', () => {
-    if (scrollTimer) clearTimeout(scrollTimer);
-    scrollTimer = setTimeout(syncActiveFromScroll, 60);
+    if (scrollRaf) return;
+    scrollRaf = requestAnimationFrame(() => {
+      scrollRaf = null;
+      syncActiveFromScroll();
+    });
   }, { passive: true });
 
   // Arrow buttons (desktop)
