@@ -2576,7 +2576,6 @@ const INITIAL = {
 })();
 
 
-
 // Carousel functionality for mobile plans
 (function() {
   const carousel = document.querySelector('.plans-carousel');
@@ -2585,102 +2584,77 @@ const INITIAL = {
   const nextBtn = document.querySelector('.carousel-next');
   const planCards = document.querySelectorAll('.plan-card');
   
-  if (!carousel) return;
-  
+  if (!carousel || !planCards.length) return;
+
+  const isMobile = () => !!(window.matchMedia && window.matchMedia('(max-width: 900px)').matches);
+
   // Default to Pro Pack (middle card) on mobile
-  let currentIndex = (window.matchMedia && window.matchMedia('(max-width: 900px)').matches) ? 1 : 0;
-  
-  // Function to update carousel position
-  function updateCarousel() {
-    const cardWidth = planCards[0].offsetWidth + 30; // width + margin
-    carousel.scrollTo({
-      left: currentIndex * cardWidth,
-      behavior: 'smooth'
-    });
+  let currentIndex = isMobile() ? 1 : 0;
+
+  // Update active states for dots and cards
+  function setActive(index) {
+    dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
+    planCards.forEach((card, i) => card.classList.toggle('active', i === index));
+  }
+
+  // Scroll so the given card is centered in the viewport.
+  // Uses real offsetLeft/offsetWidth so it works regardless of card width/margins.
+  function scrollToIndex(index, behavior) {
+    const card = planCards[index];
+    if (!card) return;
+    const left = card.offsetLeft - (carousel.clientWidth - card.offsetWidth) / 2;
+    carousel.scrollTo({ left: Math.max(0, left), behavior: behavior || 'smooth' });
+  }
+
+  // Programmatic navigation (dots / arrows / external callers)
+  function goToIndex(index) {
+    currentIndex = Math.max(0, Math.min(planCards.length - 1, index));
+    setActive(currentIndex);
+    scrollToIndex(currentIndex);
+  }
 
   // Expose a helper so other scripts (modal open) can force the active plan
-  window.setPlanIndex = function(i) {
-    if (!planCards || !planCards.length) return;
-    currentIndex = Math.max(0, Math.min(planCards.length - 1, i));
-    // Prefer snapping the desired card into view, then update active states
-    try {
-      const card = planCards[currentIndex];
-      if (card && card.scrollIntoView) {
-        card.scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
-      }
-    } catch(e) {}
-    updateCarousel();
-  };
-    
-    // Update active dot
-    dots.forEach((dot, index) => {
-      dot.classList.toggle('active', index === currentIndex);
+  window.setPlanIndex = function(i) { goToIndex(i); };
+
+  // Native scroll-snap owns the swipe gesture. We only read the resulting
+  // position and sync the active dot/card so JS never fights the gesture.
+  function syncActiveFromScroll() {
+    const center = carousel.scrollLeft + carousel.clientWidth / 2;
+    let nearest = 0;
+    let minDist = Infinity;
+    planCards.forEach((card, i) => {
+      const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+      const dist = Math.abs(cardCenter - center);
+      if (dist < minDist) { minDist = dist; nearest = i; }
     });
-    
-    // Update active card
-    planCards.forEach((card, index) => {
-      card.classList.toggle('active', index === currentIndex);
-    });
+    if (nearest !== currentIndex) {
+      currentIndex = nearest;
+      setActive(currentIndex);
+    }
   }
-  
-  // Next button click
-  if (nextBtn) {
-    nextBtn.addEventListener('click', () => {
-      currentIndex = (currentIndex + 1) % planCards.length;
-      updateCarousel();
-    });
-  }
-  
-  // Previous button click
-  if (prevBtn) {
-    prevBtn.addEventListener('click', () => {
-      currentIndex = (currentIndex - 1 + planCards.length) % planCards.length;
-      updateCarousel();
-    });
-  }
-  
+
+  let scrollTimer = null;
+  carousel.addEventListener('scroll', () => {
+    if (scrollTimer) clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(syncActiveFromScroll, 60);
+  }, { passive: true });
+
+  // Arrow buttons (desktop)
+  if (nextBtn) nextBtn.addEventListener('click', () => goToIndex(currentIndex + 1));
+  if (prevBtn) prevBtn.addEventListener('click', () => goToIndex(currentIndex - 1));
+
   // Dot navigation
   dots.forEach(dot => {
-    dot.addEventListener('click', () => {
-      currentIndex = parseInt(dot.dataset.index);
-      updateCarousel();
-    });
+    dot.addEventListener('click', () => goToIndex(parseInt(dot.dataset.index, 10)));
   });
-  
-  // Swipe handling for touch devices
-  let touchStartX = 0;
-  let touchEndX = 0;
-  
-  carousel.addEventListener('touchstart', e => {
-    touchStartX = e.changedTouches[0].screenX;
-  }, false);
-  
-  carousel.addEventListener('touchend', e => {
-    touchEndX = e.changedTouches[0].screenX;
-    handleSwipe();
-  }, false);
-  
-  function handleSwipe() {
-    const swipeThreshold = 50;
-    
-    if (touchEndX < touchStartX - swipeThreshold) {
-      // Swipe left - go to next
-      currentIndex = (currentIndex + 1) % planCards.length;
-      updateCarousel();
-    }
-    
-    if (touchEndX > touchStartX + swipeThreshold) {
-      // Swipe right - go to previous
-      currentIndex = (currentIndex - 1 + planCards.length) % planCards.length;
-      updateCarousel();
-    }
-  }
-  
-  // Initialize carousel (ensure correct default active card)
-  updateCarousel();
-  
-  // Adjust for window resize
-  window.addEventListener('resize', updateCarousel);
+
+  // Initialize: set active state immediately, then center the default card
+  // once layout is ready.
+  setActive(currentIndex);
+  requestAnimationFrame(() => scrollToIndex(currentIndex, 'auto'));
+
+  // Keep the active card centered on resize/orientation change
+  window.addEventListener('resize', () => scrollToIndex(currentIndex, 'auto'));
 })();
 
 </script>
