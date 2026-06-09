@@ -554,8 +554,8 @@ app.post('/payment/create-order', ensureAuthenticated, async (req, res) => {
         const { plan } = req.body; // 'small' | 'medium' | 'large'
         const plans = {
             small: { amount: 9900, turns: 5, label: '₹99 — 5 turns' },
-            medium: { amount: 50000, turns: 15, label: '₹500 — 15 turns' },
-            large: { amount: 100000, turns: 50, label: '₹1000 — 50 turns' }
+            medium: { amount: 29000, turns: 15, label: '₹290 — 15 turns' },
+            large: { amount: 90000, turns: 50, label: '₹900 — 50 turns' }
         };
         if (!plans[plan]) return res.status(400).json({ error: 'Invalid plan' });
 
