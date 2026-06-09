@@ -553,7 +553,7 @@ app.post('/payment/create-order', ensureAuthenticated, async (req, res) => {
     try {
         const { plan } = req.body; // 'small' | 'medium' | 'large'
         const plans = {
-            small: { amount: 20000, turns: 5, label: '₹200 — 5 turns' },
+            small: { amount: 9900, turns: 5, label: '₹99 — 5 turns' },
             medium: { amount: 50000, turns: 15, label: '₹500 — 15 turns' },
             large: { amount: 100000, turns: 50, label: '₹1000 — 50 turns' }
         };
